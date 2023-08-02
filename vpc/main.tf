@@ -1,7 +1,7 @@
 # create aws vpc
 
 resource "aws_vpc" "da-mlops-prod-vpc" {
-  cidr_block           = "10.143.0.0/16"
+  cidr_block           = "10.22.0.0/16"
   instance_tenancy     = "default"
   enable_dns_support   = true
   enable_dns_hostnames = true
