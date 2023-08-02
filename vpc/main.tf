@@ -23,7 +23,7 @@ resource "aws_internet_gateway" "da-mlops-prod-igw" {
 # create eip
 
 resource "aws_eip" "da-mlops-prod-eip" {
-  count      = length(var.public_subnet_cidr)
+  count      = 1
   vpc        = true
   depends_on = [aws_internet_gateway.da-mlops-prod-igw]
 
@@ -65,19 +65,23 @@ resource "aws_route_table" "da-mlops-prod-pub-rtb" {
 }
 
 resource "aws_nat_gateway" "da-mlops-prod-natgw" {
-  count         = length(var.public_subnet_cidr)
-  allocation_id = element(aws_eip.da-mlops-prod-eip.*.id, count.index)
-  subnet_id     = element(aws_subnet.da-mlops-prod-public-subnet.*.id, count.index)
+#   count         = length(var.public_subnet_cidr)
+#   allocation_id = element(aws_eip.da-mlops-prod-eip.*.id, count.index)
+#   subnet_id     = element(aws_subnet.da-mlops-prod-public-subnet.*.id, count.index)
+
+count         = 1
+allocation_id = aws_eip.da-mlops-prod-eip[0].id
+subnet_id     = aws_subnet.da-mlops-prod-public-subnet[0].id
 
   tags = {
-    Name = "da-mlops-prod-natgw-${count.index}"
+    Name = "da-mlops-prod-natgw-0"
   }
 }
 
 # create route tables
 
 resource "aws_route_table" "da-mlops-prod-priv-rtb" {
-  count  = length(var.private_subnet_cidr)
+  count = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.da-mlops-prod-vpc.id
 
   tags = {
@@ -90,7 +94,8 @@ resource "aws_route" "da-mlops-prod-priv-route" {
   count                  = length(var.private_subnet_cidr)
   route_table_id         = element(aws_route_table.da-mlops-prod-priv-rtb.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(aws_nat_gateway.da-mlops-prod-natgw.*.id, count.index)
+  # nat_gateway_id         = element(aws_nat_gateway.da-mlops-prod-natgw.*.id, count.index)
+  nat_gateway_id = aws_nat_gateway.da-mlops-prod-natgw[0].id
 }
 
 resource "aws_route_table_association" "da-mlops-prod-pub-rtba" {
@@ -110,7 +115,7 @@ resource "aws_subnet" "da-mlops-prod-private-subnet" {
   vpc_id            = aws_vpc.da-mlops-prod-vpc.id
   cidr_block        = element(var.private_subnet_cidr, count.index)
   availability_zone = element(var.availability_zones, count.index)
-  map_public_ip_on_launch = true
+  # map_public_ip_on_launch = true
   depends_on = [aws_route_table.da-mlops-prod-priv-rtb]
 
   tags = {
@@ -125,7 +130,7 @@ resource "aws_subnet" "da-mlops-prod-private-subnet" {
 resource "aws_route_table_association" "da-mlops-prod-priv-rtba" {
   count          = length(var.private_subnet_cidr)
   subnet_id      = element(aws_subnet.da-mlops-prod-private-subnet.*.id, count.index)
-  route_table_id = element(aws_route_table.da-mlops-prod-pub-rtb.*.id, count.index)
+  route_table_id = element(aws_route_table.da-mlops-prod-priv-rtb.*.id, count.index)
 
   # tags = {
   #     Name = "da-mlops-prod-priv-rtba"
@@ -152,7 +157,7 @@ resource "aws_subnet" "da-mlops-prod-db-sub" {
 resource "aws_route_table_association" "da-mlops-prod-db-rtba" {
   count          = length(var.private_db_subnet_cidr)
   subnet_id      = element(aws_subnet.da-mlops-prod-db-sub.*.id, count.index)
-  route_table_id = element(aws_route_table.da-mlops-prod-pub-rtb.*.id, count.index)
+  route_table_id = element(aws_route_table.da-mlops-prod-priv-rtb.*.id, count.index)
 
   # tags = {
   #     Name = "da-mlops-prod-db-rtba"
@@ -199,27 +204,27 @@ resource "aws_vpc_endpoint" "da-mlops-prod-ecrdkr-endpoint" {
 
 # create ecrapi ecr s3 endpoint
 
-resource "aws_vpc_endpoint" "da-mlops-prod-ecrapi-ecr-s3-endpoint" {
-    vpc_id = aws_vpc.da-mlops-prod-vpc.id
-    service_name = "com.amazonaws.${var.region}.ecr.api.s3"
-    vpc_endpoint_type = "Interface"
-    private_dns_enabled = true
-    security_group_ids = [aws_security_group.da-mlops-prod-ecrapi-sg.id]
-    subnet_ids = aws_subnet.da-mlops-prod-private-subnet.*.id
-    tags = {
-        Name = "da-mlops-prod-ecrapi-ecr-s3-endpoint"
-    }
-}
+# resource "aws_vpc_endpoint" "da-mlops-prod-ecrapi-ecr-s3-endpoint" {
+#     vpc_id = aws_vpc.da-mlops-prod-vpc.id
+#     service_name = "com.amazonaws.${var.region}.ecr.api"
+#     vpc_endpoint_type = "Interface"
+#     private_dns_enabled = true
+#     security_group_ids = [aws_security_group.da-mlops-prod-ecrapi-sg.id]
+#     subnet_ids = aws_subnet.da-mlops-prod-private-subnet.*.id
+#     tags = {
+#         Name = "da-mlops-prod-ecrapi-ecr-s3-endpoint"
+#     }
+# }
 
 # create ecs s3 endpoint
 
 resource "aws_vpc_endpoint" "da-mlops-prod-ecs-s3-endpoint" {
     vpc_id = aws_vpc.da-mlops-prod-vpc.id
-    service_name = "com.amazonaws.${var.region}.ecs"
-    vpc_endpoint_type = "Interface"
-    private_dns_enabled = true
-    security_group_ids = [aws_security_group.da-mlops-prod-ecs-sg.id]
-    subnet_ids = aws_subnet.da-mlops-prod-private-subnet.*.id
+    service_name = "com.amazonaws.${var.region}.s3"
+    vpc_endpoint_type = "Gateway"
+    private_dns_enabled = false
+    # security_group_ids = [aws_security_group.da-mlops-prod-ecs-sg.id]
+    # subnet_ids = aws_subnet.da-mlops-prod-private-subnet.*.id
     tags = {
         Name = "da-mlops-prod-ecs-s3-endpoint"
     }
@@ -240,7 +245,6 @@ resource "aws_vpc_endpoint" "da-mlops-prod-ecs-agent-endpoint" {
 }
 
 # create ecs-telemetry endpoint
-
 resource "aws_vpc_endpoint" "da-mlops-prod-ecs-telemetry-endpoint" {
     vpc_id = aws_vpc.da-mlops-prod-vpc.id
     service_name = "com.amazonaws.${var.region}.ecs-telemetry"

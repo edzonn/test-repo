@@ -1,0 +1,1 @@
+${data.template_file.pvc_yaml.rendered}
