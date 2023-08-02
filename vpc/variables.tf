@@ -1,18 +1,18 @@
 variable "public_subnet_cidr" {
   description = "The CIDR block for the public subnet"
-  default     = ["10.143.48.0/24", "10.143.49.0/24", "10.143.50.0/24"]
+  default     = ["10.22.48.0/24", "10.22.49.0/24", "10.22.50.0/24"]
   type        = list(any)
 }
 
 variable "private_subnet_cidr" {
   description = "The CIDR block for the private subnet"
-  default     = ["10.143.0.0/24", "10.143.16.0/24", "10.143.32.0/24"]
+  default     = ["10.22.0.0/24", "10.22.16.0/24", "10.22.32.0/24"]
   type        = list(any)
 }
 
 variable "private_db_subnet_cidr" {
   description = "The CIDR block for the private subnet"
-  default     = ["10.143.51.0/24", "10.143.52.0/24", "10.143.53.0/24"]
+  default     = ["10.22.51.0/24", "10.22.52.0/24", "10.22.53.0/24"]
   type        = list(any)
 }
 
