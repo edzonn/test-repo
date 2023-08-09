@@ -7,13 +7,13 @@
 #   }
 # }
 
-terraform {
-  required_providers {
-    kubectl = {
-      source = "gavinbunney/kubectl"
-    }
-  }
-}
+# terraform {
+#   required_providers {
+#     kubectl = {
+#       source = "gavinbunney/kubectl"
+#     }
+#   }
+# }
 
 provider "aws" {
   region = "ap-southeast-1"
@@ -24,9 +24,11 @@ provider "kubernetes" {
 }
 
 data "terraform_remote_state" "module_outputs" {
-  backend = "local" # This assumes local backend; adjust according to your setup
+  backend = "s3"
   config = {
-    path = "../vpc/terraform.tfstate"
+    bucket = "da-mlops-test0021-s3-bucket"
+    key    = "dev/terraform.statefile"
+    region = "ap-southeast-1"
   }
 }
 
@@ -45,11 +47,11 @@ module "eks_managed_node_group" {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t3.small"]
+      instance_types = ["t3.micro"]
 
 
       min_size      = 1
-      max_size      = 3
+      max_size      = 2
       desired_size  = 2
       capacity_type = "ON_DEMAND"
       labels = {
@@ -71,10 +73,10 @@ module "eks_managed_node_group" {
 
     two = {
       name           = "node-group-2"
-      instance_types = ["t3.small"]
+      instance_types = ["t3.micro"]
       min_size       = 1
       max_size       = 2
-      desired_size   = 1
+      desired_size   = 2
     }
   }
 }
@@ -89,70 +91,70 @@ EOF
   depends_on = [module.eks_managed_node_group]
 }
 
-resource "kubectl_manifest" "ebs_csi_driver" {
-  yaml_body  = <<EOF
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: ebs-csi-driver
-  namespace: kube-system
-spec:
-  selector:
-    matchLabels:
-      app: ebs-csi-driver
-  template:
-    metadata:
-      labels:
-        app: ebs-csi-driver
-    spec:
-      containers:
-        - name: ebs-csi-driver
-          image: amazon/aws-ebs-csi-driver:v1.3.0
-          volumeMounts:
-            - name: plugin-dir
-              mountPath: /csi
-          env:
-            - name: AWS_REGION
-              value: "${var.aws_region}"
-      volumes:
-        - name: plugin-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins/kubernetes.io/csi
-EOF
-  depends_on = [null_resource.configure_kubectl]
-}
+# resource "kubectl_manifest" "ebs_csi_driver" {
+#   yaml_body  = <<EOF
+# apiVersion: apps/v1
+# kind: DaemonSet
+# metadata:
+#   name: ebs-csi-driver
+#   namespace: kube-system
+# spec:
+#   selector:
+#     matchLabels:
+#       app: ebs-csi-driver
+#   template:
+#     metadata:
+#       labels:
+#         app: ebs-csi-driver
+#     spec:
+#       containers:
+#         - name: ebs-csi-driver
+#           image: amazon/aws-ebs-csi-driver:v1.3.0
+#           volumeMounts:
+#             - name: plugin-dir
+#               mountPath: /csi
+#           env:
+#             - name: AWS_REGION
+#               value: "${var.aws_region}"
+#       volumes:
+#         - name: plugin-dir
+#           hostPath:
+#             path: /var/lib/kubelet/plugins/kubernetes.io/csi
+# EOF
+#   depends_on = [null_resource.configure_kubectl]
+# }
 
-resource "kubectl_manifest" "ebs_storage_class" {
-  yaml_body  = <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: ebs-sc
-provisioner: ebs.csi.aws.com
-parameters:
-  type: gp2  # Adjust the volume type as needed (e.g., io1, sc1, st1)
-EOF
-  depends_on = [kubectl_manifest.ebs_csi_driver]
-}
+# resource "kubectl_manifest" "ebs_storage_class" {
+#   yaml_body  = <<EOF
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: ebs-sc
+# provisioner: ebs.csi.aws.com
+# parameters:
+#   type: gp2  # Adjust the volume type as needed (e.g., io1, sc1, st1)
+# EOF
+#   depends_on = [kubectl_manifest.ebs_csi_driver]
+# }
 
 
-resource "kubernetes_storage_class" "da-mlops-prod-storageclass" {
-  metadata {
-    name = "da-mlops-prod-storageclass"
-  }
-  # storageclass
-  storage_provisioner = "ebs.csi.aws.com"
-  parameters = {
-    type      = "gp2"
-    fsType    = "ext4"
-    encrypted = "true"
-  }
-  reclaim_policy         = "Retain"
-  allow_volume_expansion = true
-  volume_binding_mode    = "WaitForFirstConsumer"
-  mount_options          = ["debug"]
-  # depends_on             = [kubernetes_namespace.da-mlops-prod-namespace]
-}
+# resource "kubernetes_storage_class" "da-mlops-prod-storageclass" {
+#   metadata {
+#     name = "da-mlops-prod-storageclass"
+#   }
+#   # storageclass
+#   storage_provisioner = "ebs.csi.aws.com"
+#   parameters = {
+#     type      = "gp2"
+#     fsType    = "ext4"
+#     encrypted = "true"
+#   }
+#   reclaim_policy         = "Retain"
+#   allow_volume_expansion = true
+#   volume_binding_mode    = "WaitForFirstConsumer"
+#   mount_options          = ["debug"]
+#   # depends_on             = [kubernetes_namespace.da-mlops-prod-namespace]
+# }
 
 # resource "kubernetes_namespace" "da-mlops-prod-namespace" {
 #   metadata {
@@ -160,4 +162,5 @@ resource "kubernetes_storage_class" "da-mlops-prod-storageclass" {
 #   }
 #   depends_on = [kubernetes_storage_class.da-mlops-prod-storageclass]
 # }
+
 

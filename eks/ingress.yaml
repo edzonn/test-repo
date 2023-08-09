@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoiam
+  namespace: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-basic-auth@kubernetescrd
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /whoiam
+        pathType: Prefix
+        backend:
+          service:
+            name: whoami
+            port:
+              number: 80

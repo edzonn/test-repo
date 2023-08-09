@@ -1,0 +1,90 @@
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[1;39r[?12h[?12l[27m[23m[29m[m[H[2J[?25l[39;1H"/tmp/kubectl-edit-1714264990.yaml" 51L, 1365C[1;1H[34m# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#[m
+[36mapiVersion[m[35m:[m v1
+[36mkind[m[35m:[m Service
+[36mmetadata[m[35m:[m
+  [36mannotations[m[35m:[m
+    [36mmeta.helm.sh/release-name[m[35m:[m traefik
+    [36mmeta.helm.sh/release-namespace[m[35m:[m traefik
+    [36mservice.beta.kubernetes.io/aws-load-balancer-type[m[35m:[m nlb
+  [36mcreationTimestamp[m[35m:[m [31m"2023-08-09T00:48:29Z"[m
+  [36mfinalizers[m[35m:[m
+  [38;5;130m- [mservice.kubernetes.io/load-balancer-cleanup
+  [36mlabels[m[35m:[m
+    [36mapp.kubernetes.io/instance[m[35m:[m traefik-traefik
+    [36mapp.kubernetes.io/managed-by[m[35m:[m Helm
+    [36mapp.kubernetes.io/name[m[35m:[m traefik
+    [36mhelm.sh/chart[m[35m:[m traefik-23.2.0
+  [36mname[m[35m:[m traefik
+  [36mnamespace[m[35m:[m traefik
+  [36mresourceVersion[m[35m:[m [31m"11609"[m
+  [36muid[m[35m:[m 14b46d1e-cac6-49d5-b968-6e71c4207f85
+[36mspec[m[35m:[m
+  [36mallocateLoadBalancerNodePorts[m[35m:[m [31mtrue[m
+  [36mclusterIP[m[35m:[m 172.20.144.3
+  [36mclusterIPs[m[35m:[m
+  [38;5;130m- [m172.20.144.3
+  [36mexternalTrafficPolicy[m[35m:[m Cluster
+  [36minternalTrafficPolicy[m[35m:[m Cluster
+  [36mipFamilies[m[35m:[m
+  [38;5;130m- [mIPv4
+  [36mipFamilyPolicy[m[35m:[m SingleStack
+  [36mports[m[35m:[m
+  [38;5;130m- [m[36mname[m[35m:[m web
+    [36mnodePort[m[35m:[m [31m32361[m
+    [36mport[m[35m:[m [31m80[m
+    [36mprotocol[m[35m:[m TCP[39;160H1,1[11CTop[1;1H[?25h[?25l[39;1HType  :qa!  and press <Enter> to abandon all changes and exit Vim[39;160H[K[39;160H1,1[11CTop[1;1H[?25h[?25l[39;150H^Z[1;1H[39;1H
+[?2004l[?1l>[?25h[?1049l[23;0;0t[?2004lapiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: traefik
+      meta.helm.sh/release-namespace: traefik
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    creationTimestamp: "2023-08-09T00:48:29Z"
+    finalizers:
+    - service.kubernetes.io/load-balancer-cleanup
+    labels:
+      app.kubernetes.io/instance: traefik-traefik
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: traefik
+      helm.sh/chart: traefik-23.2.0
+    name: traefik
+    namespace: traefik
+    resourceVersion: "11609"
+    uid: 14b46d1e-cac6-49d5-b968-6e71c4207f85
+  spec:
+    allocateLoadBalancerNodePorts: true
+    clusterIP: 172.20.144.3
+    clusterIPs:
+    - 172.20.144.3
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: web
+      nodePort: 32361
+      port: 80
+      protocol: TCP
+      targetPort: web
+    - name: websecure
+      nodePort: 30235
+      port: 443
+      protocol: TCP
+      targetPort: websecure
+    selector:
+      app.kubernetes.io/instance: traefik-traefik
+      app.kubernetes.io/name: traefik
+    sessionAffinity: None
+    type: LoadBalancer
+  status:
+    loadBalancer: {}
+kind: List
+metadata:
+  resourceVersion: ""

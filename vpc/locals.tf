@@ -1,6 +1,6 @@
 locals {
   tags = {
-    name       = "da-mlops-prod"
+    name       = "da-mlops-test"
     GithubRepo = "terraform-aws-eks"
     GithubOrg  = "terraform-aws-modules"
   }
