@@ -1,0 +1,1359 @@
+{
+  "version": 4,
+  "terraform_version": "1.5.0",
+  "serial": 27,
+  "lineage": "1b819473-5d22-d59f-8448-1cb37b210729",
+  "outputs": {
+    "database_subnet_group_id": {
+      "value": "da-mlops-test-db-subnet-group",
+      "type": "string"
+    },
+    "database_subnet_private_subnet": {
+      "value": [
+        "subnet-02c9c88c10a81f339",
+        "subnet-0345befa7cd49fb96",
+        "subnet-036f94d9156ec861e"
+      ],
+      "type": [
+        "set",
+        "string"
+      ]
+    },
+    "nat_gateway_ids": {
+      "value": [
+        "nat-073d87058a9f2cf70"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "nat_gateway_private_ips": {
+      "value": [
+        "10.22.48.33"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "nat_gateway_public_ips": {
+      "value": [
+        "18.138.178.167"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "private_route_table_ids": {
+      "value": [
+        "rtb-0ba472797bccbab94",
+        "rtb-04285659c36cd0550",
+        "rtb-0e177b61d31c740f8"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "private_subnet_ids": {
+      "value": [
+        "subnet-04d2f9d08003835f4",
+        "subnet-0fe6bd6774c0f5114",
+        "subnet-003f2e54f6875f8c0"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "public_route_table_ids": {
+      "value": [
+        "rtb-0fe760c68e22dc0cc"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "public_subnet_ids": {
+      "value": [
+        "subnet-0b6ce8c012321dd3c",
+        "subnet-0e27d957df15d594b",
+        "subnet-0badac95965aa0374"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "vpc_id": {
+      "value": "vpc-09a53fae3cd53249a",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "aws_db_subnet_group",
+      "name": "da-mlops-test-db-subnet-group",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:rds:ap-southeast-1:396246268796:subgrp:da-mlops-test-db-subnet-group",
+            "description": "Managed by Terraform",
+            "id": "da-mlops-test-db-subnet-group",
+            "name": "da-mlops-test-db-subnet-group",
+            "name_prefix": "",
+            "subnet_ids": [
+              "subnet-02c9c88c10a81f339",
+              "subnet-0345befa7cd49fb96",
+              "subnet-036f94d9156ec861e"
+            ],
+            "supported_network_types": [
+              "IPV4"
+            ],
+            "tags": {
+              "Name": "da-mlops-test-db-subnet-group"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-db-subnet-group"
+            },
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-db-sub",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_eip",
+      "name": "da-mlops-test-eip",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "address": null,
+            "allocation_id": "eipalloc-0b92047f55fd94c8a",
+            "associate_with_private_ip": null,
+            "association_id": "",
+            "carrier_ip": "",
+            "customer_owned_ip": "",
+            "customer_owned_ipv4_pool": "",
+            "domain": "vpc",
+            "id": "eipalloc-0b92047f55fd94c8a",
+            "instance": "",
+            "network_border_group": "ap-southeast-1",
+            "network_interface": "",
+            "private_dns": null,
+            "private_ip": "",
+            "public_dns": "ec2-18-138-178-167.ap-southeast-1.compute.amazonaws.com",
+            "public_ip": "18.138.178.167",
+            "public_ipv4_pool": "amazon",
+            "tags": {
+              "Name": "da-mlops-test-eip"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-eip"
+            },
+            "timeouts": null,
+            "vpc": true
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxODAwMDAwMDAwMDAsInJlYWQiOjkwMDAwMDAwMDAwMCwidXBkYXRlIjozMDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_internet_gateway",
+      "name": "da-mlops-test-igw",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:internet-gateway/igw-0bfc344f991829c6c",
+            "id": "igw-0bfc344f991829c6c",
+            "owner_id": "396246268796",
+            "tags": {
+              "Name": "da-mlops-test-igw"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-igw"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_nat_gateway",
+      "name": "da-mlops-test-natgw",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "allocation_id": "eipalloc-0b92047f55fd94c8a",
+            "association_id": "eipassoc-01dc718e5aa13bcfe",
+            "connectivity_type": "public",
+            "id": "nat-073d87058a9f2cf70",
+            "network_interface_id": "eni-03541977ba0d860db",
+            "private_ip": "10.22.48.33",
+            "public_ip": "18.138.178.167",
+            "secondary_allocation_ids": null,
+            "secondary_private_ip_address_count": 0,
+            "secondary_private_ip_addresses": [],
+            "subnet_id": "subnet-0b6ce8c012321dd3c",
+            "tags": {
+              "Name": "da-mlops-test-natgw-0"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-natgw-0"
+            },
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTgwMDAwMDAwMDAwMCwidXBkYXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route",
+      "name": "da-mlops-test-priv-route",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "carrier_gateway_id": "",
+            "core_network_arn": "",
+            "destination_cidr_block": "0.0.0.0/0",
+            "destination_ipv6_cidr_block": "",
+            "destination_prefix_list_id": "",
+            "egress_only_gateway_id": "",
+            "gateway_id": "",
+            "id": "r-rtb-0ba472797bccbab941080289494",
+            "instance_id": "",
+            "instance_owner_id": "",
+            "local_gateway_id": "",
+            "nat_gateway_id": "nat-073d87058a9f2cf70",
+            "network_interface_id": "",
+            "origin": "CreateRoute",
+            "route_table_id": "rtb-0ba472797bccbab94",
+            "state": "active",
+            "timeouts": null,
+            "transit_gateway_id": "",
+            "vpc_endpoint_id": "",
+            "vpc_peering_connection_id": ""
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "carrier_gateway_id": "",
+            "core_network_arn": "",
+            "destination_cidr_block": "0.0.0.0/0",
+            "destination_ipv6_cidr_block": "",
+            "destination_prefix_list_id": "",
+            "egress_only_gateway_id": "",
+            "gateway_id": "",
+            "id": "r-rtb-04285659c36cd05501080289494",
+            "instance_id": "",
+            "instance_owner_id": "",
+            "local_gateway_id": "",
+            "nat_gateway_id": "nat-073d87058a9f2cf70",
+            "network_interface_id": "",
+            "origin": "CreateRoute",
+            "route_table_id": "rtb-04285659c36cd0550",
+            "state": "active",
+            "timeouts": null,
+            "transit_gateway_id": "",
+            "vpc_endpoint_id": "",
+            "vpc_peering_connection_id": ""
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "carrier_gateway_id": "",
+            "core_network_arn": "",
+            "destination_cidr_block": "0.0.0.0/0",
+            "destination_ipv6_cidr_block": "",
+            "destination_prefix_list_id": "",
+            "egress_only_gateway_id": "",
+            "gateway_id": "",
+            "id": "r-rtb-0e177b61d31c740f81080289494",
+            "instance_id": "",
+            "instance_owner_id": "",
+            "local_gateway_id": "",
+            "nat_gateway_id": "nat-073d87058a9f2cf70",
+            "network_interface_id": "",
+            "origin": "CreateRoute",
+            "route_table_id": "rtb-0e177b61d31c740f8",
+            "state": "active",
+            "timeouts": null,
+            "transit_gateway_id": "",
+            "vpc_endpoint_id": "",
+            "vpc_peering_connection_id": ""
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table",
+      "name": "da-mlops-test-priv-rtb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:route-table/rtb-0ba472797bccbab94",
+            "id": "rtb-0ba472797bccbab94",
+            "owner_id": "396246268796",
+            "propagating_vgws": [],
+            "route": [],
+            "tags": {
+              "Name": "da-mlops-test-priv-rtb-0"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-priv-rtb-0"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:route-table/rtb-04285659c36cd0550",
+            "id": "rtb-04285659c36cd0550",
+            "owner_id": "396246268796",
+            "propagating_vgws": [],
+            "route": [],
+            "tags": {
+              "Name": "da-mlops-test-priv-rtb-1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-priv-rtb-1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:route-table/rtb-0e177b61d31c740f8",
+            "id": "rtb-0e177b61d31c740f8",
+            "owner_id": "396246268796",
+            "propagating_vgws": [],
+            "route": [],
+            "tags": {
+              "Name": "da-mlops-test-priv-rtb-2"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-priv-rtb-2"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table",
+      "name": "da-mlops-test-pub-rtb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:route-table/rtb-0fe760c68e22dc0cc",
+            "id": "rtb-0fe760c68e22dc0cc",
+            "owner_id": "396246268796",
+            "propagating_vgws": [],
+            "route": [
+              {
+                "carrier_gateway_id": "",
+                "cidr_block": "0.0.0.0/0",
+                "core_network_arn": "",
+                "destination_prefix_list_id": "",
+                "egress_only_gateway_id": "",
+                "gateway_id": "igw-0bfc344f991829c6c",
+                "ipv6_cidr_block": "",
+                "local_gateway_id": "",
+                "nat_gateway_id": "",
+                "network_interface_id": "",
+                "transit_gateway_id": "",
+                "vpc_endpoint_id": "",
+                "vpc_peering_connection_id": ""
+              }
+            ],
+            "tags": {
+              "Name": "da-mlops-test-pub-rtb"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-pub-rtb"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "da-mlops-test-db-rtba",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-06dfe429f6faa41ec",
+            "route_table_id": "rtb-0ba472797bccbab94",
+            "subnet_id": "subnet-036f94d9156ec861e",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-db-sub",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0de2461bd5aadfb0d",
+            "route_table_id": "rtb-04285659c36cd0550",
+            "subnet_id": "subnet-0345befa7cd49fb96",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-db-sub",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-01a1614ada04cbd76",
+            "route_table_id": "rtb-0e177b61d31c740f8",
+            "subnet_id": "subnet-02c9c88c10a81f339",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-db-sub",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "da-mlops-test-priv-rtba",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0f6aef403ab049f2a",
+            "route_table_id": "rtb-0ba472797bccbab94",
+            "subnet_id": "subnet-04d2f9d08003835f4",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-private-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-01fa68d561597c6ef",
+            "route_table_id": "rtb-04285659c36cd0550",
+            "subnet_id": "subnet-0fe6bd6774c0f5114",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-private-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0a8f2fc050867bf0a",
+            "route_table_id": "rtb-0e177b61d31c740f8",
+            "subnet_id": "subnet-003f2e54f6875f8c0",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-private-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "da-mlops-test-pub-rtba",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0d9beb4c432b35bb0",
+            "route_table_id": "rtb-0fe760c68e22dc0cc",
+            "subnet_id": "subnet-0b6ce8c012321dd3c",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_route_table.da-mlops-test-pub-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0b403f1544ce34b07",
+            "route_table_id": "rtb-0fe760c68e22dc0cc",
+            "subnet_id": "subnet-0e27d957df15d594b",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_route_table.da-mlops-test-pub-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-071bca6f8c553ee69",
+            "route_table_id": "rtb-0fe760c68e22dc0cc",
+            "subnet_id": "subnet-0badac95965aa0374",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_route_table.da-mlops-test-pub-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "da-mlops-test-ecrapi-sg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:security-group/sg-082a9ff01a9e3ef01",
+            "description": "Security group for DA MLOps testuction ECR API",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-082a9ff01a9e3ef01",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 65535
+              }
+            ],
+            "name": "da-mlops-test-ecrapi-sg",
+            "name_prefix": "",
+            "owner_id": "396246268796",
+            "revoke_rules_on_delete": false,
+            "tags": null,
+            "tags_all": {},
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "da-mlops-test-ecrdkr-sg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:security-group/sg-0d2ef5b68593a38a4",
+            "description": "Security group for DA MLOps testuction ECR Docker",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-0d2ef5b68593a38a4",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 65535
+              }
+            ],
+            "name": "da-mlops-test-ecrdkr-sg",
+            "name_prefix": "",
+            "owner_id": "396246268796",
+            "revoke_rules_on_delete": false,
+            "tags": null,
+            "tags_all": {},
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "da-mlops-test-ecs-sg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:security-group/sg-0dec54e9042e3a4e9",
+            "description": "Security group for DA MLOps testuction ECS",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-0dec54e9042e3a4e9",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 65535
+              }
+            ],
+            "name": "da-mlops-test-ecs-sg",
+            "name_prefix": "",
+            "owner_id": "396246268796",
+            "revoke_rules_on_delete": false,
+            "tags": null,
+            "tags_all": {},
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "da-mlops-test-db-sub",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-036f94d9156ec861e",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1a",
+            "availability_zone_id": "apse1-az1",
+            "cidr_block": "10.22.51.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-036f94d9156ec861e",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-db-0"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-db-0"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-0345befa7cd49fb96",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1b",
+            "availability_zone_id": "apse1-az2",
+            "cidr_block": "10.22.52.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0345befa7cd49fb96",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-db-1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-db-1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-02c9c88c10a81f339",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1c",
+            "availability_zone_id": "apse1-az3",
+            "cidr_block": "10.22.53.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-02c9c88c10a81f339",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-db-2"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-db-2"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_eip.da-mlops-test-eip",
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_nat_gateway.da-mlops-test-natgw",
+            "aws_route.da-mlops-test-priv-route",
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_subnet.da-mlops-test-public-subnet",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "da-mlops-test-private-subnet",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-04d2f9d08003835f4",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1a",
+            "availability_zone_id": "apse1-az1",
+            "cidr_block": "10.22.0.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-04d2f9d08003835f4",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-private-0",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-private-0",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-0fe6bd6774c0f5114",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1b",
+            "availability_zone_id": "apse1-az2",
+            "cidr_block": "10.22.16.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0fe6bd6774c0f5114",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-private-1",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-private-1",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-003f2e54f6875f8c0",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1c",
+            "availability_zone_id": "apse1-az3",
+            "cidr_block": "10.22.32.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-003f2e54f6875f8c0",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-private-2",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-private-2",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/internal-elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_route_table.da-mlops-test-priv-rtb",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "da-mlops-test-public-subnet",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-0b6ce8c012321dd3c",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1a",
+            "availability_zone_id": "apse1-az1",
+            "cidr_block": "10.22.48.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0b6ce8c012321dd3c",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-public-0",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-public-0",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-0e27d957df15d594b",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1b",
+            "availability_zone_id": "apse1-az2",
+            "cidr_block": "10.22.49.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0e27d957df15d594b",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-public-1",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-public-1",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        },
+        {
+          "index_key": 2,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:subnet/subnet-0badac95965aa0374",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-southeast-1c",
+            "availability_zone_id": "apse1-az3",
+            "cidr_block": "10.22.50.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0badac95965aa0374",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "396246268796",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "da-mlops-test-public-2",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-public-2",
+              "kubernetes.io/cluster/my-cluster": "enabled",
+              "kubernetes.io/role/elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-09a53fae3cd53249a"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_internet_gateway.da-mlops-test-igw",
+            "aws_vpc.da-mlops-test-vpc"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "da-mlops-test-vpc",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-southeast-1:396246268796:vpc/vpc-09a53fae3cd53249a",
+            "assign_generated_ipv6_cidr_block": false,
+            "cidr_block": "10.22.0.0/16",
+            "default_network_acl_id": "acl-05b6dab0fd1ff35a6",
+            "default_route_table_id": "rtb-0d13355485faed26f",
+            "default_security_group_id": "sg-0c7499b533e0b8eea",
+            "dhcp_options_id": "dopt-0f76a85e426ed729e",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "id": "vpc-09a53fae3cd53249a",
+            "instance_tenancy": "default",
+            "ipv4_ipam_pool_id": null,
+            "ipv4_netmask_length": null,
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_network_border_group": "",
+            "ipv6_ipam_pool_id": "",
+            "ipv6_netmask_length": 0,
+            "main_route_table_id": "rtb-0d13355485faed26f",
+            "owner_id": "396246268796",
+            "tags": {
+              "Name": "da-mlops-test-vpc"
+            },
+            "tags_all": {
+              "Name": "da-mlops-test-vpc"
+            }
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

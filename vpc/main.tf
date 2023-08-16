@@ -1,30 +1,30 @@
-provider "aws" {
-  region = "ap-southeast-1"  # Change this to your desired AWS region
-}
+# provider "aws" {
+#   region = "ap-southeast-1"  # Change this to your desired AWS region
+# }
 
-resource "aws_vpc_ipam" "ipv6" {
-  operating_regions {
-    region_name = "ap-southeast-1"
-  }
-}
+# resource "aws_vpc_ipam" "ipv6" {
+#   operating_regions {
+#     region_name = "ap-southeast-1"
+#   }
+# }
 
-resource "aws_vpc_ipam_pool" "ipv6" {
-  description                       = "IPv6 pool"
-  address_family                    = "ipv6"
-  # ipam_scope_id                     = aws_vpc_ipam.ipv6.
-  ipam_scope_id = aws_vpc_ipam.ipv6.public_default_scope_id
-  locale                            = "ap-southeast-1"
-  allocation_default_netmask_length = 56
-  publicly_advertisable             = false
-  aws_service = "ec2"
-}
+# resource "aws_vpc_ipam_pool" "ipv6" {
+#   description                       = "IPv6 pool"
+#   address_family                    = "ipv6"
+#   # ipam_scope_id                     = aws_vpc_ipam.ipv6.
+#   ipam_scope_id = aws_vpc_ipam.ipv6.public_default_scope_id
+#   locale                            = "ap-southeast-1"
+#   allocation_default_netmask_length = 56
+#   publicly_advertisable             = false
+#   aws_service = "ec2"
+# }
 
-resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
-  # ipv6_cidr_block = aws_vpc.da-mlops-test-vpc.ipv6_cidr_block
-  vpc_id          = aws_vpc.da-mlops-test-vpc.id
-  ipv6_cidr_block = aws_vpc_ipam_pool.ipv6.id
-  ipv6_ipam_pool_id = aws_vpc_ipam_pool.ipv6.id
-}
+# resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
+#   # ipv6_cidr_block = aws_vpc.da-mlops-test-vpc.ipv6_cidr_block
+#   vpc_id          = aws_vpc.da-mlops-test-vpc.id
+#   ipv6_cidr_block = aws_vpc_ipam_pool.ipv6.id
+#   ipv6_ipam_pool_id = aws_vpc_ipam_pool.ipv6.id
+# }
 # create aws vpc
 
 resource "aws_vpc" "da-mlops-test-vpc" {

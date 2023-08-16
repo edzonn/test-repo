@@ -28,7 +28,7 @@ resource "aws_docdb_cluster" "da-mlops-test-docdb" {
     skip_final_snapshot       = var.skip_final_snapshot
     db_subnet_group_name      = aws_db_subnet_group.da-mlops-test-docdb-subnet-group.name
     vpc_security_group_ids    = [aws_security_group.da-mlops-test-docdb-sg.id]
-    cluster_parameters = var.cluster_parameters
+    # cluster_parameters = var.cluster_parameters
     tags = {
         Name = "da-mlops-test-docdb"
     }
