@@ -1,0 +1,46 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: hashicorp/terraform:light
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    steps:
+      - checkout
+      - run:
+          name: Terraform Init
+          command: |
+            terraform init
+      - run:
+          name: Terraform Validate
+          command: |
+            terraform validate
+      - run:
+          name: Terraform Plan
+          command: |
+            terraform plan -out=terraform.tfplan
+  deploy:
+    docker:
+      - image: hashicorp/terraform:light
+    environment:
+      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Apply
+          command: |
+            terraform apply terraform.tfplan
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
