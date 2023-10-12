@@ -81,12 +81,28 @@ resource "aws_autoscaling_policy" "cpu_scaling_policy" {
   }
 }
 
+# create predictive scaling
+
+resource "aws_appautoscaling_scheduled_action" "predictive_scaling" {
+  name                 = "predictive-scaling"
+  service_namespace    = "eks"
+  scalable_dimension   = "eks:node-group:DesiredCapacity"
+  resource_id          = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
+  scalable_target_action {
+    min_capacity = 1
+    max_capacity = 2
+  }
+  schedule = "at(2021-09-30T00:00:00)"
+}
+
 
 resource "null_resource" "configure_kubectl" {
   # count = var.aws_region != "" && module.eks_managed_node_group.cluster_id != null ? 1 : 0
   provisioner "local-exec" {
     command = <<EOF
-aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
+# aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
+
+aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name}
 EOF
   }
   depends_on = [module.eks_managed_node_group]
