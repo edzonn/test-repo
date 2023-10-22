@@ -14,6 +14,10 @@ variable "volume_type" {
   type = string
 }
 
+variable "volume_size_auto_resize" {
+  type = bool
+}
+ 
 variable "throughput" {
   type = number
 }
@@ -59,5 +63,9 @@ variable "zone_awareness_enabled" {
 }
 
 variable "engine_version" {
+  type = string
+}
+
+variable "domain_name" {
   type = string
 }

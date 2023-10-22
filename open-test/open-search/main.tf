@@ -1,6 +1,3 @@
-# terraform {
-#   required_version = "~> 1.3.3"
-# }
 
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
@@ -19,19 +16,9 @@ data "terraform_remote_state" "route53" {
 }
 
 
-
-# locals {
-#   domain        = "${var.service}-engine"
-#   custom_domain = "${local.domain}.${data.aws_route53_zone.opensearch.name}"
-#   # subnet_ids    = slice(data.terraform_remote_state.module_outputs.outputs.private_subnet_ids.id,0, var.instance_count)
-# subnet_ids = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids[*].id
-
-#   master_user   = "${var.service}-masteruser"
-# }
-
 locals {
   domain        = "${var.service}-engine"
-  custom_domain = "${local.domain}.${data.aws_route53_zone.opensearch.name}"
+  # custom_domain = "${local.domain}.${data.aws_route53_zone.opensearch.name}"
   subnet_ids    = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
   master_user   = "${var.service}-masteruser"
 }
@@ -39,7 +26,6 @@ locals {
 
 resource "aws_security_group" "opensearch_security_group" {
   name = "${local.domain}-sg"
-  # vpc_id      = data.aws_vpc.selected.id
   vpc_id      = data.terraform_remote_state.module_outputs.outputs.vpc_id
   description = "Allow inbound HTTP traffic"
 
@@ -55,79 +41,65 @@ resource "aws_security_group" "opensearch_security_group" {
   }
 }
 
-# YOU can uncomment this if you're planning to use AWS VPN
-/* resource "aws_security_group_rule" "allow_opensearch_ingress_vpn" {
-  type                     = "ingress"
-  from_port                = 443
-  to_port                  = 443
-  protocol                 = "tcp"
-  source_security_group_id = "# source_security_group_id "
-  security_group_id        = aws_security_group.opensearch_security_group.id
-  description              = "Allow connections from AWS VPN"
-} */
-
-
 resource "random_password" "password" {
   length  = 32
   special = true
 }
 
-#tfsec:ignore:aws-cloudwatch-log-group-customer-key
-# resource "aws_cloudwatch_log_group" "opensearch_log_group_index_slow_logs" {
-#   name              = "/aws/opensearch/${local.domain}/index-slow"
-#   retention_in_days = 14
-# }
 
-# #tfsec:ignore:aws-cloudwatch-log-group-customer-key
-# resource "aws_cloudwatch_log_group" "opensearch_log_group_search_slow_logs" {
-#   name              = "/aws/opensearch/${local.domain}/search-slow"
-#   retention_in_days = 14
-# }
+resource "aws_cloudwatch_log_group" "opensearch_log_group_index_slow_logs" {
+  name              = "/aws/opensearch/${local.domain}/index-slow"
+  retention_in_days = 14
+}
 
-# #tfsec:ignore:aws-cloudwatch-log-group-customer-key
-# resource "aws_cloudwatch_log_group" "opensearch_log_group_es_application_logs" {
-#   name              = "/aws/opensearch/${local.domain}/es-application"
-#   retention_in_days = 14
-# }
+resource "aws_cloudwatch_log_group" "opensearch_log_group_search_slow_logs" {
+  name              = "/aws/opensearch/${local.domain}/search-slow"
+  retention_in_days = 14
+}
 
-# resource "aws_cloudwatch_log_resource_policy" "opensearch_log_resource_policy" {
-#   policy_name = "${local.domain}-domain-log-resource-policy"
+resource "aws_cloudwatch_log_group" "opensearch_log_group_es_application_logs" {
+  name              = "/aws/opensearch/${local.domain}/es-application"
+  retention_in_days = 14
+}
 
-#   policy_document = <<CONFIG
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "Service": "es.amazonaws.com"
-#       },
-#       "Action": [
-#         "logs:PutLogEvents",
-#         "logs:PutLogEventsBatch",
-#         "logs:CreateLogStream"
-#       ],
-#       "Resource": [
-#         "${aws_cloudwatch_log_group.opensearch_log_group_index_slow_logs.arn}:*",
-#         "${aws_cloudwatch_log_group.opensearch_log_group_search_slow_logs.arn}:*",
-#         "${aws_cloudwatch_log_group.opensearch_log_group_es_application_logs.arn}:*"
-#       ],
-#       "Condition": {
-#           "StringEquals": {
-#               "aws:SourceAccount": "${data.aws_caller_identity.current.account_id}"
-#           },
-#           "ArnLike": {
-#               "aws:SourceArn": "arn:aws:es:eu-central-1:${data.aws_caller_identity.current.account_id}:domain/${local.domain}"
-#           }
-#       }
-#     }
-#   ]
-# }
-# CONFIG
-# }
+resource "aws_cloudwatch_log_resource_policy" "opensearch_log_resource_policy" {
+  policy_name = "${local.domain}-domain-log-resource-policy"
+
+  policy_document = <<CONFIG
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "es.amazonaws.com"
+      },
+      "Action": [
+        "logs:PutLogEvents",
+        "logs:PutLogEventsBatch",
+        "logs:CreateLogStream"
+      ],
+      "Resource": [
+        "${aws_cloudwatch_log_group.opensearch_log_group_index_slow_logs.arn}:*",
+        "${aws_cloudwatch_log_group.opensearch_log_group_search_slow_logs.arn}:*",
+        "${aws_cloudwatch_log_group.opensearch_log_group_es_application_logs.arn}:*"
+      ],
+      "Condition": {
+          "StringEquals": {
+              "aws:SourceAccount": "${data.aws_caller_identity.current.account_id}"
+          },
+          "ArnLike": {
+              "aws:SourceArn": "arn:aws:es:eu-central-1:${data.aws_caller_identity.current.account_id}:domain/${local.domain}"
+          }
+      }
+    }
+  ]
+}
+CONFIG
+}
 
 resource "aws_opensearch_domain" "opensearch" {
-  domain_name    = local.domain
+  domain_name    = var.domain_name
   engine_version = "OpenSearch_${var.engine_version}"
 
   cluster_config {
@@ -159,10 +131,6 @@ resource "aws_opensearch_domain" "opensearch" {
   domain_endpoint_options {
     enforce_https       = true
     tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
-
-    # custom_endpoint_enabled         = true
-    # custom_endpoint                 = local.custom_domain
-    # custom_endpoint_certificate_arn  = data.terraform_remote_state.route53.outputs.arn_certificate
   }
 
   ebs_options {
@@ -216,13 +184,4 @@ resource "aws_ssm_parameter" "opensearch_master_user" {
   description = "opensearch_password for ${var.service} domain"
   type        = "SecureString"
   value       = "${local.master_user},${random_password.password.result}"
-}
-
-resource "aws_route53_record" "opensearch_domain_record" {
-  zone_id = data.terraform_remote_state.route53.outputs.route53_zone_id
-  name    = local.custom_domain
-  type    = "CNAME"
-  ttl     = "300"
-
-  records = [aws_opensearch_domain.opensearch.endpoint]
 }
