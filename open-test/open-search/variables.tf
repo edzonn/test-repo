@@ -69,3 +69,23 @@ variable "engine_version" {
 variable "domain_name" {
   type = string
 }
+
+variable "master_user_name"{
+  type = string
+  # default = "root"
+}    
+      
+variable "master_user_password" {
+  type = string
+  # default = "P4ssw0rd123@"
+}
+
+variable "access_policy" {
+  type        = string
+  default     = null
+}
+
+variable "default_policy_for_fine_grained_access_control" {
+  type        = bool
+  default     = false
+}

@@ -8,15 +8,6 @@ data "terraform_remote_state" "module_outputs" {
   }
 }
 
-
-data "terraform_remote_state" "route53" {
-  backend = "local"
-  config = {
-    path = "../route53/terraform.tfstate"
-  }
-}
-
-
 module "opensearch" {
   source = "../open-test/open-search"
   vpc    = data.terraform_remote_state.module_outputs.outputs.vpc_id
@@ -37,6 +28,9 @@ module "opensearch" {
   dedicated_master_count   = 3
   dedicated_master_type    = "m6g.large.search"
   zone_awareness_enabled   = true
+  default_policy_for_fine_grained_access_control = true
+  master_user_name     = "root"
+  master_user_password = "P4ssw0rd123@"
 }
 
 
