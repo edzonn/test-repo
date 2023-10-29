@@ -19,6 +19,7 @@ module "eks_managed_node_group" {
   source                         = "terraform-aws-modules/eks/aws"
   cluster_name                   = "my-cluster"
   cluster_version                = "1.27"
+  iam_role_name = "eks-node-group-role"
   subnet_ids                     = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
   vpc_id                         = data.terraform_remote_state.module_outputs.outputs.vpc_id
   cluster_endpoint_public_access = true
@@ -83,104 +84,103 @@ resource "aws_autoscaling_policy" "cpu_scaling_policy" {
 
 # create predictive scaling
 
-resource "aws_appautoscaling_scheduled_action" "predictive_scaling" {
-  name                 = "predictive-scaling"
-  service_namespace    = "eks"
-  scalable_dimension   = "eks:node-group:DesiredCapacity"
-  resource_id          = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
-  scalable_target_action {
-    min_capacity = 1
-    max_capacity = 2
-  }
-  schedule = "at(2021-09-30T00:00:00)"
-}
+# resource "aws_appautoscaling_scheduled_action" "predictive_scaling" {
+#   name                 = "predictive-scaling"
+#   service_namespace    = "eks"
+#   scalable_dimension   = "eks:node-group:DesiredCapacity"
+#   resource_id          = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
+#   scalable_target_action {
+#     min_capacity = 1
+#     max_capacity = 2
+#   }
+#   schedule = "at(2021-09-30T00:00:00)"
+# }
 
 
-resource "null_resource" "configure_kubectl" {
-  # count = var.aws_region != "" && module.eks_managed_node_group.cluster_id != null ? 1 : 0
-  provisioner "local-exec" {
-    command = <<EOF
-# aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
+# resource "null_resource" "configure_kubectl" {
+#   # count = var.aws_region != "" && module.eks_managed_node_group.cluster_id != null ? 1 : 0
+#   provisioner "local-exec" {
+#     command = <<EOF
+#  aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
+# EOF
+#   }
+#   depends_on = [module.eks_managed_node_group]
+# }
 
-aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name}
-EOF
-  }
-  depends_on = [module.eks_managed_node_group]
-}
+# resource "kubectl_manifest" "ebs_csi_driver" {
+#   yaml_body  = <<EOF
+# apiVersion: apps/v1
+# kind: DaemonSet
+# metadata:
+#   name: ebs-csi-driver
+#   namespace: kube-system
+# spec:
+#   selector:
+#     matchLabels:
+#       app: ebs-csi-driver
+#   template:
+#     metadata:
+#       labels:
+#         app: ebs-csi-driver
+#     spec:
+#       containers:
+#         - name: ebs-csi-driver
+#           image: amazon/aws-ebs-csi-driver:v1.3.0
+#           volumeMounts:
+#             - name: plugin-dir
+#               mountPath: /csi
+#           env:
+#             - name: AWS_REGION
+#               value: "${var.aws_region}"
+#       volumes:
+#         - name: plugin-dir
+#           hostPath:
+#             path: /var/lib/kubelet/plugins/kubernetes.io/csi
+# EOF
+#   depends_on = [null_resource.configure_kubectl]
+# }
 
-resource "kubectl_manifest" "ebs_csi_driver" {
-  yaml_body  = <<EOF
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: ebs-csi-driver
-  namespace: kube-system
-spec:
-  selector:
-    matchLabels:
-      app: ebs-csi-driver
-  template:
-    metadata:
-      labels:
-        app: ebs-csi-driver
-    spec:
-      containers:
-        - name: ebs-csi-driver
-          image: amazon/aws-ebs-csi-driver:v1.3.0
-          volumeMounts:
-            - name: plugin-dir
-              mountPath: /csi
-          env:
-            - name: AWS_REGION
-              value: "${var.aws_region}"
-      volumes:
-        - name: plugin-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins/kubernetes.io/csi
-EOF
-  depends_on = [null_resource.configure_kubectl]
-}
+# resource "kubectl_manifest" "ebs_storage_class" {
+#   yaml_body  = <<EOF
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: ebs-sc
+# provisioner: ebs.csi.aws.com
+# parameters:
+# parameters:
+#   type: gp2
+# EOF
+#   depends_on = [kubectl_manifest.ebs_csi_driver]
+# }
 
-resource "kubectl_manifest" "ebs_storage_class" {
-  yaml_body  = <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: ebs-sc
-provisioner: ebs.csi.aws.com
-parameters:
-parameters:
-  type: gp2
-EOF
-  depends_on = [kubectl_manifest.ebs_csi_driver]
-}
+# resource "kubectl_manifest" "da_mlops_prod_namespace" {
+#   yaml_body = <<EOF
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: da-mlops-prod-namespace
+# EOF
+# }
 
-resource "kubectl_manifest" "da_mlops_prod_namespace" {
-  yaml_body = <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: da-mlops-prod-namespace
-EOF
-}
+# resource "kubectl_manifest" "da_mlops_prod_storageclass" {
+#   yaml_body  = <<EOF
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: da-mlops-prod-storageclass
+# provisioner: ebs.csi.aws.com
+# parameters:
+#   type: gp3
+#   capacity: 20Gi
+#   fsType: ext4
+#   encrypted: "true"
+# reclaimPolicy: Retain
+# allowVolumeExpansion: true
+# volumeBindingMode: WaitForFirstConsumer
+# mountOptions:
+#   - "debug"
+# EOF
+#   depends_on = [kubectl_manifest.da_mlops_prod_namespace]
+# }
 
-resource "kubectl_manifest" "da_mlops_prod_storageclass" {
-  yaml_body  = <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: da-mlops-prod-storageclass
-provisioner: ebs.csi.aws.com
-parameters:
-  type: gp3
-  capacity: 20Gi
-  fsType: ext4
-  encrypted: "true"
-reclaimPolicy: Retain
-allowVolumeExpansion: true
-volumeBindingMode: WaitForFirstConsumer
-mountOptions:
-  - "debug"
-EOF
-  depends_on = [kubectl_manifest.da_mlops_prod_namespace]
-}

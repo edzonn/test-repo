@@ -6,7 +6,7 @@ provider "aws" {
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }
@@ -131,7 +131,7 @@ resource "aws_instance" "da-mlops-test-ec2-01" {
   subnet_id              = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids[0]
   vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
   # create iam instance profile
-  iam_instance_profile = "ec2-ssm-role"
+  # iam_instance_profile = "ec2-ssm-role"
   tags = {
     Name = "da-mlops-test-ec2"
   }

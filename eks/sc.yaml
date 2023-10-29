@@ -1,0 +1,15 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: da-mlops-prod-storageclass-test
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp3
+  capacity: 20Gi
+  fsType: ext4
+  encrypted: "true"
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+mountOptions:
+  - "debug"
