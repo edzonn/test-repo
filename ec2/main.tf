@@ -168,4 +168,3 @@ resource "aws_instance" "da-mlops-test-ec2-01" {
               sudo yum install postgresql15 -y
               EOF
 }
-

@@ -2,7 +2,7 @@
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }
@@ -22,11 +22,11 @@ module "opensearch" {
   ebs_volume_size          = 45
   volume_size_auto_resize  = true
   service                  = "opensearch"
-  instance_type            = "m6g.large.search"
-  instance_count           = 3
+  instance_type            = "t2.micro.search"
+  instance_count           = 1
   dedicated_master_enabled = true
-  dedicated_master_count   = 3
-  dedicated_master_type    = "m6g.large.search"
+  dedicated_master_count   = 1
+  dedicated_master_type    = "t2.micro.search"
   zone_awareness_enabled   = true
   default_policy_for_fine_grained_access_control = true
   master_user_name     = "root"

@@ -87,53 +87,53 @@ resource "aws_security_group" "da-mlops-test-docdb-sg" {
     }
 }
 
-resource "aws_iam_role" "da-mlops-test-docdb-role" {
-    name = "da-mlops-test-docdb-role"
-    assume_role_policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": "sts:AssumeRole",
-            "Principal": {
-                "Service": "docdb.amazonaws.com"
-            },
-            "Effect": "Allow",
-            "Sid": ""
-        }
-    ]
-}
+# resource "aws_iam_role" "da-mlops-test-docdb-role" {
+#     name = "da-mlops-test-docdb-role"
+#     assume_role_policy = <<EOF
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Action": "sts:AssumeRole",
+#             "Principal": {
+#                 "Service": "docdb.amazonaws.com"
+#             },
+#             "Effect": "Allow",
+#             "Sid": ""
+#         }
+#     ]
+# }
 
-EOF
-    tags = {
-        Name = "da-mlops-test-docdb-role"
-    }
-}
+# EOF
+#     tags = {
+#         Name = "da-mlops-test-docdb-role"
+#     }
+# }
 
-resource "aws_iam_role_policy" "da-mlops-test-docdb-role-policy" {
-    name = "da-mlops-test-docdb-role-policy"
-    role = aws_iam_role.da-mlops-test-docdb-role.id
-    policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ],
-            "Resource": "arn:aws:logs:*:*:*",
-            "Effect": "Allow"
-        },
-        {
-            "Action": [
-                "logs:CreateLogGroup"
-            ],
-            "Resource": "*",
-            "Effect": "Allow"
-        }
-    ]
-}
+# resource "aws_iam_role_policy" "da-mlops-test-docdb-role-policy" {
+#     name = "da-mlops-test-docdb-role-policy"
+#     role = aws_iam_role.da-mlops-test-docdb-role.id
+#     policy = <<EOF
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Action": [
+#                 "logs:CreateLogStream",
+#                 "logs:PutLogEvents"
+#             ],
+#             "Resource": "arn:aws:logs:*:*:*",
+#             "Effect": "Allow"
+#         },
+#         {
+#             "Action": [
+#                 "logs:CreateLogGroup"
+#             ],
+#             "Resource": "*",
+#             "Effect": "Allow"
+#         }
+#     ]
+# }
 
-EOF
-}
+# EOF
+# }

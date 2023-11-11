@@ -1,15 +1,30 @@
 
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
+# data "aws_caller_identity" "current" {}
+# data "aws_region" "current" {}
 
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }
 }
+
+# data "aws_iam_policy_document" "da-mlops-opensearch-policy" {
+#   statement {
+#     effect = "Allow"
+
+#     principals {
+#       type        = "*"
+#       identifiers = ["*"]
+#     }
+
+#     actions   = ["es:*"]
+#     resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${local.domain}/*"]
+#   }
+# }
+
 
 locals {
   domain        = "da-mlops-${var.service}-engine"
@@ -158,21 +173,7 @@ resource "aws_opensearch_domain" "opensearch" {
   }
 
 
-  access_policies = <<CONFIG
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              },
-              "Action": "es:*",
-                    "Resource": "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${local.domain}/*"
-                }
-            ]
-        }
-        CONFIG
+  # access_policies = file("${path.module}/iam.json")
 }
 
   # access_policies = var.access_policy == null && var.default_policy_for_fine_grained_access_control ? (<<CONFIG
@@ -198,3 +199,4 @@ resource "aws_opensearch_domain" "opensearch" {
 #   type        = "SecureString"
 #   value       = "${local.master_user},${random_password.password.result}"
 # }
+
