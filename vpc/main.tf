@@ -1,39 +1,7 @@
-# provider "aws" {
-#   region = "ap-southeast-1"  # Change this to your desired AWS region
-# }
-
-# resource "aws_vpc_ipam" "ipv6" {
-#   operating_regions {
-#     region_name = "ap-southeast-1"
-#   }
-# }
-
-# resource "aws_vpc_ipam_pool" "ipv6" {
-#   description                       = "IPv6 pool"
-#   address_family                    = "ipv6"
-#   # ipam_scope_id                     = aws_vpc_ipam.ipv6.
-#   ipam_scope_id = aws_vpc_ipam.ipv6.public_default_scope_id
-#   locale                            = "ap-southeast-1"
-#   allocation_default_netmask_length = 56
-#   publicly_advertisable             = false
-#   aws_service = "ec2"
-# }
-
-# resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
-#   # ipv6_cidr_block = aws_vpc.da-mlops-test-vpc.ipv6_cidr_block
-#   vpc_id          = aws_vpc.da-mlops-test-vpc.id
-#   ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
-# }
-# create aws vpc
-
 resource "aws_vpc" "da-mlops-test-vpc" {
   cidr_block           = "10.22.0.0/16"
   instance_tenancy     = "default"
   assign_generated_ipv6_cidr_block = true
-  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.testvpc.ipv6_cidr_block, 8, 0)}"
-  
-  # enable ipv6
-  # enable_ipv6 = true
 
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -42,11 +10,6 @@ resource "aws_vpc" "da-mlops-test-vpc" {
     Name = "da-mlops-test-vpc"
   }
 }
-
-# resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
-#   vpc_id          = aws_vpc.da-mlops-test-vpc.id
-#   ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
-# }
 
 resource "aws_internet_gateway" "da-mlops-test-igw" {
   vpc_id     = aws_vpc.da-mlops-test-vpc.id
@@ -69,59 +32,7 @@ resource "aws_eip" "da-mlops-test-eip" {
   }
 }
 
-# resource "aws_eip" "da-mlops-test-eip" {
-#   count = length(var.public_subnet_cidr)
-#   # vpc        = true
-#   depends_on = [aws_internet_gateway.da-mlops-test-igw]
-
-#   tags = {
-#     Name = "da-mlops-test-eip.${count.index}"
-#   }
-# }
-
-# create public subnet
-
-resource "aws_subnet" "da-mlops-test-public-subnet" {
-  count             = length(var.public_subnet_cidr)
-  vpc_id            = aws_vpc.da-mlops-test-vpc.id
-  cidr_block        = element(var.public_subnet_cidr, count.index)
-  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
-  availability_zone = element(var.availability_zones, count.index)
-  # map_public_ip_on_launch = true
-  depends_on = [aws_internet_gateway.da-mlops-test-igw]
-
-  tags = {
-    Name                                          = "da-mlops-test-public-${count.index}",
-    "kubernetes.io/cluster/my-cluster" = "enabled",
-    "kubernetes.io/role/elb"                      = "1"
-  }
-}
-
-# create routeable public subnet
-
-resource "aws_route_table" "da-mlops-test-pub-rtb" {
-  vpc_id = aws_vpc.da-mlops-test-vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.da-mlops-test-igw.id
-  }
-  # depends_on = [ aws_internet_gateway.da-mlops-test-igw ]
-
-  tags = {
-    Name = "da-mlops-test-pub-rtb"
-  }
-}
-
 resource "aws_nat_gateway" "da-mlops-test-natgw" {
-#   count         = length(var.public_subnet_cidr)
-#   allocation_id = element(aws_eip.da-mlops-test-eip.*.id, count.index)
-#   subnet_id     = element(aws_subnet.da-mlops-test-public-subnet.*.id, count.index)
-
-#   tags = {
-#     Name = "da-mlops-test-natgw-${count.index}"
-#   }
-# }
-
 count         = 1
 allocation_id = aws_eip.da-mlops-test-eip[0].id
 subnet_id     = aws_subnet.da-mlops-test-public-subnet[0].id
@@ -131,34 +42,18 @@ subnet_id     = aws_subnet.da-mlops-test-public-subnet[0].id
   }
 }
 
-# create route tables
-
-resource "aws_route_table" "da-mlops-test-priv-rtb" {
-  count = length(var.private_subnet_cidr)
-  vpc_id = aws_vpc.da-mlops-test-vpc.id
+resource "aws_subnet" "da-mlops-test-public-subnet" {
+  count             = length(var.public_subnet_cidr)
+  vpc_id            = aws_vpc.da-mlops-test-vpc.id
+  cidr_block        = element(var.public_subnet_cidr, count.index)
+  availability_zone = element(var.availability_zones, count.index)
+  depends_on = [aws_internet_gateway.da-mlops-test-igw]
 
   tags = {
-    Name = "da-mlops-test-priv-rtb-${count.index}"
+    Name                                          = "da-mlops-test-public-${count.index}",
+    "kubernetes.io/cluster/my-cluster" = "enabled",
+    "kubernetes.io/role/elb"                      = "1"
   }
-}
-
-# create aws_route
-resource "aws_route" "da-mlops-test-priv-route" {
-  count                  = length(var.private_subnet_cidr)
-  route_table_id         = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(aws_nat_gateway.da-mlops-test-natgw.*.id, count.index)
-  # nat_gateway_id = aws_nat_gateway.da-mlops-test-natgw[0].id
-}
-
-resource "aws_route_table_association" "da-mlops-test-pub-rtba" {
-  count          = length(var.public_subnet_cidr)
-  subnet_id      = element(aws_subnet.da-mlops-test-public-subnet.*.id, count.index)
-  route_table_id = aws_route_table.da-mlops-test-pub-rtb.id
-
-  # tags = {
-  #     Name = "da-mlops-test-pub-rtba"
-  # }
 }
 
 # create private subnet
@@ -179,27 +74,13 @@ resource "aws_subnet" "da-mlops-test-private-subnet" {
   }
 }
 
-# create route table association
-
-resource "aws_route_table_association" "da-mlops-test-priv-rtba" {
-  count          = length(var.private_subnet_cidr)
-  subnet_id      = element(aws_subnet.da-mlops-test-private-subnet.*.id, count.index)
-  route_table_id = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
-
-  # tags = {
-  #     Name = "da-mlops-test-priv-rtba"
-  # }
-}
-
 # create aws subnet db
 
 resource "aws_subnet" "da-mlops-test-db-sub" {
   count             = length(var.private_db_subnet_cidr)
   vpc_id            = aws_vpc.da-mlops-test-vpc.id
   cidr_block        = element(var.private_db_subnet_cidr, count.index)
-  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 8)}"
   availability_zone = element(var.availability_zones, count.index)
-  # map_public_ip_on_launch = true
   depends_on = [aws_route.da-mlops-test-priv-route]
 
   tags = {
@@ -207,16 +88,66 @@ resource "aws_subnet" "da-mlops-test-db-sub" {
   }
 }
 
+# create aws_route
+resource "aws_route" "da-mlops-test-priv-route" {
+  count                  = length(var.private_subnet_cidr)
+  route_table_id         = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = element(aws_nat_gateway.da-mlops-test-natgw.*.id, count.index)
+  # nat_gateway_id = aws_nat_gateway.da-mlops-test-natgw[0].id
+}
+
+
+# create routeable public subnet
+
+resource "aws_route_table" "da-mlops-test-pub-rtb" {
+  vpc_id = aws_vpc.da-mlops-test-vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.da-mlops-test-igw.id
+  }
+  tags = {
+    Name = "da-mlops-test-pub-rtb"
+  }
+}
+
+
+# create route tables
+
+resource "aws_route_table" "da-mlops-test-priv-rtb" {
+  count = length(var.private_subnet_cidr)
+  vpc_id = aws_vpc.da-mlops-test-vpc.id
+
+  tags = {
+    Name = "da-mlops-test-priv-rtb-${count.index}"
+  }
+}
+
+
+resource "aws_route_table_association" "da-mlops-test-pub-rtba" {
+  count          = length(var.public_subnet_cidr)
+  subnet_id      = element(aws_subnet.da-mlops-test-public-subnet.*.id, count.index)
+  route_table_id = aws_route_table.da-mlops-test-pub-rtb.id
+}
+
+
+
+# create route table association
+
+resource "aws_route_table_association" "da-mlops-test-priv-rtba" {
+  count          = length(var.private_subnet_cidr)
+  subnet_id      = element(aws_subnet.da-mlops-test-private-subnet.*.id, count.index)
+  route_table_id = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
+}
+
+
+
 # create aws subnet db route table association
 
 resource "aws_route_table_association" "da-mlops-test-db-rtba" {
   count          = length(var.private_db_subnet_cidr)
   subnet_id      = element(aws_subnet.da-mlops-test-db-sub.*.id, count.index)
   route_table_id = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
-
-  # tags = {
-  #     Name = "da-mlops-test-db-rtba"
-  # }
 }
 
 # create aws db subnet group
@@ -224,8 +155,6 @@ resource "aws_route_table_association" "da-mlops-test-db-rtba" {
 resource "aws_db_subnet_group" "da-mlops-test-db-subnet-group" {
   name       = "da-mlops-test-db-subnet-group"
   subnet_ids = aws_subnet.da-mlops-test-db-sub.*.id
-  # depends_on = [aws_route_table_association.da-mlops-test-db-rtba]
-
   tags = {
     Name = "da-mlops-test-db-subnet-group"
   }

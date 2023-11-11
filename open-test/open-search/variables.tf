@@ -89,3 +89,23 @@ variable "default_policy_for_fine_grained_access_control" {
   type        = bool
   default     = false
 }
+
+
+variable "access_policies" {
+  type    = string
+  default = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "es:*",
+      "arn:aws:es:ap-southeast-1:092744370500:domain/da-mlops-opensearch-engine/*"
+    }
+  ]
+}
+EOF
+}

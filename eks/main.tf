@@ -6,20 +6,32 @@ provider "aws" {
 
 
 
+# data "terraform_remote_state" "module_outputs" {
+#   backend = "s3"
+#   config = {
+#     bucket = "da-mlops-test0021-s3-bucket"
+#     key    = "dev/terraform.statefile"
+#     region = "ap-southeast-1"
+#   }
+# }
+
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }
 }
 
+
+
 module "eks_managed_node_group" {
   source                         = "terraform-aws-modules/eks/aws"
+  version                        = "19.13"
   cluster_name                   = "my-cluster"
   cluster_version                = "1.27"
-  iam_role_name = "eks-node-group-role"
+  iam_role_name                  = "eks-node-group-role"
   subnet_ids                     = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
   vpc_id                         = data.terraform_remote_state.module_outputs.outputs.vpc_id
   cluster_endpoint_public_access = true
@@ -48,8 +60,8 @@ module "eks_managed_node_group" {
             volume_size           = 20
             volume_type           = "gp2"
             delete_on_termination = true
-            encrypted             = true
-            kms_key_id            = "arn:aws:kms:ap-southeast-1:396246268796:key/d885b304-ea34-41f4-89ab-eece88bfb663"
+            # encrypted             = true
+            # kms_key_id            = "arn:aws:kms:ap-southeast-1:396246268796:key/d885b304-ea34-41f4-89ab-eece88bfb663"
           }
         }
       }

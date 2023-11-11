@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key = "dev/open-search-terraform.statefile"
     region = "ap-southeast-1"
 
