@@ -1,27 +1,10 @@
-# terraform {
-#   required_providers {
-#     kubernetes = {
-#       source  = "hashicorp/kubernetes"
-#       version = "2.21.1"  # Replace with the desired version
-#     }
-#   }
-# }
 
-# terraform {
-#   required_providers {
-#     kubectl = {
-#       source = "gavinbunney/kubectl"
-#     }
-#   }
-# }
 
 provider "aws" {
   region = "ap-southeast-1"
 }
 
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+
 
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
@@ -36,6 +19,7 @@ module "eks_managed_node_group" {
   source                         = "terraform-aws-modules/eks/aws"
   cluster_name                   = "my-cluster"
   cluster_version                = "1.27"
+  iam_role_name = "eks-node-group-role"
   subnet_ids                     = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
   vpc_id                         = data.terraform_remote_state.module_outputs.outputs.vpc_id
   cluster_endpoint_public_access = true
@@ -47,12 +31,12 @@ module "eks_managed_node_group" {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t3.micro"]
+      instance_types = ["t3.medium"]
 
 
       min_size      = 1
       max_size      = 2
-      desired_size  = 2
+      desired_size  = 1
       capacity_type = "ON_DEMAND"
       labels = {
         disktype = "test"
@@ -73,23 +57,55 @@ module "eks_managed_node_group" {
 
     two = {
       name           = "node-group-2"
-      instance_types = ["t3.micro"]
-      min_size       = 1
+      instance_types = ["t3.medium"]
+      min_size       = 0
       max_size       = 2
-      desired_size   = 2
+      desired_size   = 0
     }
   }
 }
 
-resource "null_resource" "configure_kubectl" {
-  # count = var.aws_region != "" && module.eks_managed_node_group.cluster_id != null ? 1 : 0
-  provisioner "local-exec" {
-    command = <<EOF
-aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
-EOF
+# create dyamic scaling policy
+
+resource "aws_autoscaling_policy" "cpu_scaling_policy" {
+  name                   = "cpu-scaling-policy"
+  policy_type            = "TargetTrackingScaling"
+  # create autoscaling policy for node group 1
+  autoscaling_group_name = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+
+    target_value = 50.0
   }
-  depends_on = [module.eks_managed_node_group]
 }
+
+# create predictive scaling
+
+# resource "aws_appautoscaling_scheduled_action" "predictive_scaling" {
+#   name                 = "predictive-scaling"
+#   service_namespace    = "eks"
+#   scalable_dimension   = "eks:node-group:DesiredCapacity"
+#   resource_id          = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
+#   scalable_target_action {
+#     min_capacity = 1
+#     max_capacity = 2
+#   }
+#   schedule = "at(2021-09-30T00:00:00)"
+# }
+
+
+# resource "null_resource" "configure_kubectl" {
+#   # count = var.aws_region != "" && module.eks_managed_node_group.cluster_id != null ? 1 : 0
+#   provisioner "local-exec" {
+#     command = <<EOF
+#  aws eks --region ${var.aws_region} update-kubeconfig --name ${module.eks_managed_node_group.cluster_name} --kubeconfig /mnt/c/Users/user/Desktop/terraform/test-repo/eks/kubeconfig.yaml
+# EOF
+#   }
+#   depends_on = [module.eks_managed_node_group]
+# }
 
 # resource "kubectl_manifest" "ebs_csi_driver" {
 #   yaml_body  = <<EOF
@@ -132,35 +148,39 @@ EOF
 #   name: ebs-sc
 # provisioner: ebs.csi.aws.com
 # parameters:
-#   type: gp2  # Adjust the volume type as needed (e.g., io1, sc1, st1)
+# parameters:
+#   type: gp2
 # EOF
 #   depends_on = [kubectl_manifest.ebs_csi_driver]
 # }
 
-
-# resource "kubernetes_storage_class" "da-mlops-prod-storageclass" {
-#   metadata {
-#     name = "da-mlops-prod-storageclass"
-#   }
-#   # storageclass
-#   storage_provisioner = "ebs.csi.aws.com"
-#   parameters = {
-#     type      = "gp2"
-#     fsType    = "ext4"
-#     encrypted = "true"
-#   }
-#   reclaim_policy         = "Retain"
-#   allow_volume_expansion = true
-#   volume_binding_mode    = "WaitForFirstConsumer"
-#   mount_options          = ["debug"]
-#   # depends_on             = [kubernetes_namespace.da-mlops-prod-namespace]
+# resource "kubectl_manifest" "da_mlops_prod_namespace" {
+#   yaml_body = <<EOF
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: da-mlops-prod-namespace
+# EOF
 # }
 
-# resource "kubernetes_namespace" "da-mlops-prod-namespace" {
-#   metadata {
-#     name = "da-mlops-prod-namespace"
-#   }
-#   depends_on = [kubernetes_storage_class.da-mlops-prod-storageclass]
+# resource "kubectl_manifest" "da_mlops_prod_storageclass" {
+#   yaml_body  = <<EOF
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: da-mlops-prod-storageclass
+# provisioner: ebs.csi.aws.com
+# parameters:
+#   type: gp3
+#   capacity: 20Gi
+#   fsType: ext4
+#   encrypted: "true"
+# reclaimPolicy: Retain
+# allowVolumeExpansion: true
+# volumeBindingMode: WaitForFirstConsumer
+# mountOptions:
+#   - "debug"
+# EOF
+#   depends_on = [kubectl_manifest.da_mlops_prod_namespace]
 # }
-
 

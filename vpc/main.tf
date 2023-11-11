@@ -1,35 +1,40 @@
-provider "aws" {
-  region = "ap-southeast-1"  # Change this to your desired AWS region
-}
+# provider "aws" {
+#   region = "ap-southeast-1"  # Change this to your desired AWS region
+# }
 
-resource "aws_vpc_ipam" "ipv6" {
-  operating_regions {
-    region_name = "ap-southeast-1"
-  }
-}
+# resource "aws_vpc_ipam" "ipv6" {
+#   operating_regions {
+#     region_name = "ap-southeast-1"
+#   }
+# }
 
-resource "aws_vpc_ipam_pool" "ipv6" {
-  description                       = "IPv6 pool"
-  address_family                    = "ipv6"
-  # ipam_scope_id                     = aws_vpc_ipam.ipv6.
-  ipam_scope_id = aws_vpc_ipam.ipv6.public_default_scope_id
-  locale                            = "ap-southeast-1"
-  allocation_default_netmask_length = 56
-  publicly_advertisable             = false
-  aws_service = "ec2"
-}
+# resource "aws_vpc_ipam_pool" "ipv6" {
+#   description                       = "IPv6 pool"
+#   address_family                    = "ipv6"
+#   # ipam_scope_id                     = aws_vpc_ipam.ipv6.
+#   ipam_scope_id = aws_vpc_ipam.ipv6.public_default_scope_id
+#   locale                            = "ap-southeast-1"
+#   allocation_default_netmask_length = 56
+#   publicly_advertisable             = false
+#   aws_service = "ec2"
+# }
 
-resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
-  # ipv6_cidr_block = aws_vpc.da-mlops-test-vpc.ipv6_cidr_block
-  vpc_id          = aws_vpc.da-mlops-test-vpc.id
-  ipv6_cidr_block = aws_vpc_ipam_pool.ipv6.id
-  ipv6_ipam_pool_id = aws_vpc_ipam_pool.ipv6.id
-}
+# resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
+#   # ipv6_cidr_block = aws_vpc.da-mlops-test-vpc.ipv6_cidr_block
+#   vpc_id          = aws_vpc.da-mlops-test-vpc.id
+#   ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
+# }
 # create aws vpc
 
 resource "aws_vpc" "da-mlops-test-vpc" {
   cidr_block           = "10.22.0.0/16"
   instance_tenancy     = "default"
+  assign_generated_ipv6_cidr_block = true
+  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.testvpc.ipv6_cidr_block, 8, 0)}"
+  
+  # enable ipv6
+  # enable_ipv6 = true
+
   enable_dns_support   = true
   enable_dns_hostnames = true
 
@@ -37,6 +42,11 @@ resource "aws_vpc" "da-mlops-test-vpc" {
     Name = "da-mlops-test-vpc"
   }
 }
+
+# resource "aws_vpc_ipv6_cidr_block_association" "da-mlops-test-vpc-ipv6" {
+#   vpc_id          = aws_vpc.da-mlops-test-vpc.id
+#   ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
+# }
 
 resource "aws_internet_gateway" "da-mlops-test-igw" {
   vpc_id     = aws_vpc.da-mlops-test-vpc.id
@@ -75,6 +85,7 @@ resource "aws_subnet" "da-mlops-test-public-subnet" {
   count             = length(var.public_subnet_cidr)
   vpc_id            = aws_vpc.da-mlops-test-vpc.id
   cidr_block        = element(var.public_subnet_cidr, count.index)
+  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 0)}"
   availability_zone = element(var.availability_zones, count.index)
   # map_public_ip_on_launch = true
   depends_on = [aws_internet_gateway.da-mlops-test-igw]
@@ -156,6 +167,7 @@ resource "aws_subnet" "da-mlops-test-private-subnet" {
   count             = length(var.private_subnet_cidr)
   vpc_id            = aws_vpc.da-mlops-test-vpc.id
   cidr_block        = element(var.private_subnet_cidr, count.index)
+  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 4)}"
   availability_zone = element(var.availability_zones, count.index)
   # map_public_ip_on_launch = true
   depends_on = [aws_route_table.da-mlops-test-priv-rtb]
@@ -185,6 +197,7 @@ resource "aws_subnet" "da-mlops-test-db-sub" {
   count             = length(var.private_db_subnet_cidr)
   vpc_id            = aws_vpc.da-mlops-test-vpc.id
   cidr_block        = element(var.private_db_subnet_cidr, count.index)
+  # ipv6_cidr_block = "${cidrsubnet(aws_vpc.da-mlops-test-vpc.ipv6_cidr_block, 8, 8)}"
   availability_zone = element(var.availability_zones, count.index)
   # map_public_ip_on_launch = true
   depends_on = [aws_route.da-mlops-test-priv-route]

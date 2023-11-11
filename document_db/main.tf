@@ -2,7 +2,7 @@
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }
@@ -28,7 +28,7 @@ resource "aws_docdb_cluster" "da-mlops-test-docdb" {
     skip_final_snapshot       = var.skip_final_snapshot
     db_subnet_group_name      = aws_db_subnet_group.da-mlops-test-docdb-subnet-group.name
     vpc_security_group_ids    = [aws_security_group.da-mlops-test-docdb-sg.id]
-    cluster_parameters = var.cluster_parameters
+    # cluster_parameters = var.cluster_parameters
     tags = {
         Name = "da-mlops-test-docdb"
     }
@@ -36,6 +36,17 @@ resource "aws_docdb_cluster" "da-mlops-test-docdb" {
 
 resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance" {
     identifier = var.identifier
+    # engine_version = var.engine_version
+    cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
+    instance_class = var.instance_class
+    apply_immediately = true
+    tags = {
+        Name = "da-mlops-test-docdb-instance"
+    }
+}
+
+resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance-2" {
+    identifier = var.identifier-2
     # engine_version = var.engine_version
     cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
     instance_class = var.instance_class
@@ -63,13 +74,13 @@ resource "aws_security_group" "da-mlops-test-docdb-sg" {
         from_port = 27017
         to_port = 27017
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/16"]
+        cidr_blocks = ["0.0.0.0/0"]
     }
     egress {
         from_port = 0
         to_port = 0
         protocol = "-1"
-        cidr_blocks = ["0.0.0.0/16"]
+        cidr_blocks = ["0.0.0.0/0"]
     }
     tags = {
         Name = "da-mlops-test-docdb-sg"
@@ -126,6 +137,3 @@ resource "aws_iam_role_policy" "da-mlops-test-docdb-role-policy" {
 
 EOF
 }
-
-
-
