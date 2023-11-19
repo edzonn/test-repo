@@ -4,6 +4,19 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
+module "apptier_lt" {
+  source        = "/home/ubuntu/test-repo/modules/launch_template"
+  name_prefix   = "tf-appserver-"
+  image_id      = "ami-063b93b73ef32d580"
+  instance_type = "t2.micro"
+  key_name      = "da-mlops-test-key"
+  # vpc_security_group_ids = "sg-02a51f75e628a0131"
+  tags_lt = {
+    Name = "tf-webtier_lt",
+    Kind = "practice"
+  }
+}
+
 
 
 # data "terraform_remote_state" "module_outputs" {
@@ -43,16 +56,20 @@ module "eks_managed_node_group" {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.micro"]
 
 
       min_size      = 1
       max_size      = 2
       desired_size  = 1
       capacity_type = "ON_DEMAND"
+      ami_type = "CUSTOM"
+      ami_id = "ami-063b93b73ef32d580"
       labels = {
-        disktype = "test"
+        disktype = "test-grafana"
       }
+
+      launch_template_name = module.apptier_lt.lt_id
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
@@ -69,19 +86,46 @@ module "eks_managed_node_group" {
 
     two = {
       name           = "node-group-2"
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.micro"]
       min_size       = 0
       max_size       = 2
       desired_size   = 0
     }
   }
+
+  # self_managed_node_groups = {
+  #   three = {
+  #     name          = "node-group-3"
+  #     min_size      = 1
+  #     max_size      = 2
+  #     desired_size  = 1
+  #     capacity_type = "ON_DEMAND"
+  #     labels = {
+  #       disktype = "test-grafana"
+  #     }
+
+  #     launch_template_name = module.apptier_lt.lt_id
+  #     block_device_mappings = {
+  #       xvda = {
+  #         device_name = "/dev/xvda"
+  #         ebs = {
+  #           volume_size           = 20
+  #           volume_type           = "gp2"
+  #           delete_on_termination = true
+  #           # encrypted             = true
+  #           # kms_key_id            = "arn:aws:kms:ap-southeast-1:396246268796:key/d885b304-ea34-41f4-89ab-eece88bfb663"
+  #         }
+  #       }
+  #     }
+  #   }
+  # }
 }
 
 # create dyamic scaling policy
 
 resource "aws_autoscaling_policy" "cpu_scaling_policy" {
-  name                   = "cpu-scaling-policy"
-  policy_type            = "TargetTrackingScaling"
+  name        = "cpu-scaling-policy"
+  policy_type = "TargetTrackingScaling"
   # create autoscaling policy for node group 1
   autoscaling_group_name = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names[0]
 
@@ -90,7 +134,7 @@ resource "aws_autoscaling_policy" "cpu_scaling_policy" {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
 
-    target_value = 50.0
+    target_value = 30.0
   }
 }
 
