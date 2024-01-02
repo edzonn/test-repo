@@ -22,11 +22,11 @@ module "opensearch" {
   ebs_volume_size          = 45
   volume_size_auto_resize  = true
   service                  = "opensearch"
-  instance_type            = "t2.micro.search"
-  instance_count           = 1
+  instance_type            = "t3.medium.search"
+  instance_count           = 3
   dedicated_master_enabled = true
-  dedicated_master_count   = 1
-  dedicated_master_type    = "t2.micro.search"
+  dedicated_master_count   = 3
+  dedicated_master_type    = "t3.medium.search"
   zone_awareness_enabled   = true
   default_policy_for_fine_grained_access_control = true
   master_user_name     = "root"

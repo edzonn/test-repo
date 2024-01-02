@@ -160,7 +160,35 @@ resource "aws_db_subnet_group" "da-mlops-test-db-subnet-group" {
   }
 }
 
-# resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-endpoint" {
+resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.ecr.api"
+    vpc_endpoint_type = "Interface"
+    private_dns_enabled = true
+    security_group_ids = [aws_security_group.da-mlops-test-ecrapi-sg.id]
+    subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecrapi-endpoint"
+    }
+}
+
+# create ecrdkr endpoint
+
+resource "aws_vpc_endpoint" "da-mlops-test-ecrdkr-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.ecr.dkr"
+    vpc_endpoint_type = "Interface"
+    private_dns_enabled = true
+    security_group_ids = [aws_security_group.da-mlops-test-ecrdkr-sg.id]
+    subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecrdkr-endpoint"
+    }
+}
+
+# create ecrapi ecr s3 endpoint
+
+# resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-ecr-s3-endpoint" {
 #     vpc_id = aws_vpc.da-mlops-test-vpc.id
 #     service_name = "com.amazonaws.${var.region}.ecr.api"
 #     vpc_endpoint_type = "Interface"
@@ -168,89 +196,61 @@ resource "aws_db_subnet_group" "da-mlops-test-db-subnet-group" {
 #     security_group_ids = [aws_security_group.da-mlops-test-ecrapi-sg.id]
 #     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
 #     tags = {
-#         Name = "da-mlops-test-ecrapi-endpoint"
+#         Name = "da-mlops-test-ecrapi-ecr-s3-endpoint"
 #     }
 # }
 
-# # create ecrdkr endpoint
+# create ecs s3 endpoint
 
-# resource "aws_vpc_endpoint" "da-mlops-test-ecrdkr-endpoint" {
-#     vpc_id = aws_vpc.da-mlops-test-vpc.id
-#     service_name = "com.amazonaws.${var.region}.ecr.dkr"
-#     vpc_endpoint_type = "Interface"
-#     private_dns_enabled = true
-#     security_group_ids = [aws_security_group.da-mlops-test-ecrdkr-sg.id]
-#     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-#     tags = {
-#         Name = "da-mlops-test-ecrdkr-endpoint"
-#     }
-# }
+resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.s3"
+    vpc_endpoint_type = "Gateway"
+    private_dns_enabled = false
+    # security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+    # subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecs-s3-endpoint"
+    }
+}
 
-# # create ecrapi ecr s3 endpoint
+# create ecs-agent endpoint.
 
-# # resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-ecr-s3-endpoint" {
-# #     vpc_id = aws_vpc.da-mlops-test-vpc.id
-# #     service_name = "com.amazonaws.${var.region}.ecr.api"
-# #     vpc_endpoint_type = "Interface"
-# #     private_dns_enabled = true
-# #     security_group_ids = [aws_security_group.da-mlops-test-ecrapi-sg.id]
-# #     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-# #     tags = {
-# #         Name = "da-mlops-test-ecrapi-ecr-s3-endpoint"
-# #     }
-# # }
+resource "aws_vpc_endpoint" "da-mlops-test-ecs-agent-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.ecs-agent"
+    vpc_endpoint_type = "Interface"
+    private_dns_enabled = true
+    security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+    subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecs-agent-endpoint"
+    }
+}
 
-# # create ecs s3 endpoint
+# create ecs-telemetry endpoint
+resource "aws_vpc_endpoint" "da-mlops-test-ecs-telemetry-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.ecs-telemetry"
+    vpc_endpoint_type = "Interface"
+    private_dns_enabled = true
+    security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+    subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecs-telemetry-endpoint"
+    }
+}
 
-# resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
-#     vpc_id = aws_vpc.da-mlops-test-vpc.id
-#     service_name = "com.amazonaws.${var.region}.s3"
-#     vpc_endpoint_type = "Gateway"
-#     private_dns_enabled = false
-#     # security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
-#     # subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-#     tags = {
-#         Name = "da-mlops-test-ecs-s3-endpoint"
-#     }
-# }
-
-# # create ecs-agent endpoint.
-
-# resource "aws_vpc_endpoint" "da-mlops-test-ecs-agent-endpoint" {
-#     vpc_id = aws_vpc.da-mlops-test-vpc.id
-#     service_name = "com.amazonaws.${var.region}.ecs-agent"
-#     vpc_endpoint_type = "Interface"
-#     private_dns_enabled = true
-#     security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
-#     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-#     tags = {
-#         Name = "da-mlops-test-ecs-agent-endpoint"
-#     }
-# }
-
-# # create ecs-telemetry endpoint
-# resource "aws_vpc_endpoint" "da-mlops-test-ecs-telemetry-endpoint" {
-#     vpc_id = aws_vpc.da-mlops-test-vpc.id
-#     service_name = "com.amazonaws.${var.region}.ecs-telemetry"
-#     vpc_endpoint_type = "Interface"
-#     private_dns_enabled = true
-#     security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
-#     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-#     tags = {
-#         Name = "da-mlops-test-ecs-telemetry-endpoint"
-#     }
-# }
-
-# # create ecs endpoint
-# resource "aws_vpc_endpoint" "da-mlops-test-ecs-endpoint" {
-#     vpc_id = aws_vpc.da-mlops-test-vpc.id
-#     service_name = "com.amazonaws.${var.region}.ecs"
-#     vpc_endpoint_type = "Interface"
-#     private_dns_enabled = true
-#     security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
-#     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-#     tags = {
-#         Name = "da-mlops-test-ecs-endpoint"
-#     }
-# }
+# create ecs endpoint
+resource "aws_vpc_endpoint" "da-mlops-test-ecs-endpoint" {
+    vpc_id = aws_vpc.da-mlops-test-vpc.id
+    service_name = "com.amazonaws.${var.region}.ecs"
+    vpc_endpoint_type = "Interface"
+    private_dns_enabled = true
+    security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+    subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+    tags = {
+        Name = "da-mlops-test-ecs-endpoint"
+    }
+}
 

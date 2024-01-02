@@ -133,7 +133,7 @@ resource "aws_instance" "da-mlops-test-ec2-01" {
   # create iam instance profile
   # iam_instance_profile = "ec2-ssm-role"
   tags = {
-    Name = "da-mlops-test-ec2"
+    Name = "da-mlops-test-ec2-1"
   }
   associate_public_ip_address = false
 
@@ -166,5 +166,55 @@ resource "aws_instance" "da-mlops-test-ec2-01" {
               sudo service sshd restart || service ssh restart
               sudo yum update -y
               sudo yum install postgresql15 -y
+              sudo yum install nginx -y
+              sudo service nginx restart
+              EOF
+}
+
+
+resource "aws_instance" "da-mlops-test-ec2-02" {
+  ami                    = "ami-091a58610910a87a9"
+  instance_type          = "t2.micro"
+  key_name               = "da-mlops-test-key"
+  subnet_id              = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids[0]
+  vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
+  # create iam instance profile
+  # iam_instance_profile = "ec2-ssm-role"
+  tags = {
+    Name = "da-mlops-test-ec2-2"
+  }
+  associate_public_ip_address = false
+
+  #  root volume size gp3
+
+  root_block_device {
+    volume_size = 70
+    volume_type = "gp3"
+    iops = 3000
+    throughput = 125
+    encrypted = true
+    kms_key_id = data.aws_kms_key.default.arn
+    tags = {
+      Name = "da-mlops-test-ec2-02"
+    }
+
+  }
+
+  ebs_block_device {
+    device_name = "/dev/sdh"
+    volume_size = 8
+    volume_type = "gp2"
+  }
+
+  # create ec2 instance user data with filebase64encode
+
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo perl -pi -e 's/^#?Port 22$/Port 4545/' /etc/ssh/sshd_config
+              sudo service sshd restart || service ssh restart
+              sudo yum update -y
+              sudo yum install postgresql15 -y
+              sudo yum install nginx -y
+              sudo service nginx restart
               EOF
 }

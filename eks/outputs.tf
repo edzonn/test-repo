@@ -7,3 +7,15 @@ output "eks_managed_node_groups_autoscaling_group_names" {
   description = "List of the autoscaling group names created by EKS managed node groups"
   value       = module.eks_managed_node_group.eks_managed_node_groups_autoscaling_group_names
 }
+
+# output for security group
+
+output "eks_security_group_id" {
+  description = "The ID of the security group created for the EKS cluster"
+  value       = module.eks_managed_node_group.node_security_group_id
+}
+
+# output "eks_cluster_endpoint" {
+#   description = "The endpoint for the EKS Kubernetes API"
+#   value       = module.eks_cluster.eks_cluster_endpoint
+# }
