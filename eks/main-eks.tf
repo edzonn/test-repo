@@ -55,7 +55,7 @@ module "apptier_lt" {
 module "eks_managed_node_group" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "19.13"
-  cluster_name    = "my-cluster"
+  cluster_name    = "test-cluster-da"
   cluster_version = "1.27"
   iam_role_name   = "eks-node-group-role"
   subnet_ids      = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
@@ -113,6 +113,7 @@ module "eks_managed_node_group" {
       labels = {
         disktype = "test"
       }
+      instance_type = "AL2_x86_64_GPU"
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
@@ -131,14 +132,15 @@ module "eks_managed_node_group" {
     two = {
       name = "node-group-2"
 
-      instance_types = ["t3.medium"]
-      min_size       = 2
+      instance_types = ["g4dn.xlarge"]
+      min_size       = 1
       max_size       = 2
-      desired_size   = 2
+      desired_size   = 1
       capacity_type  = "ON_DEMAND"
       labels = {
         disktype = "linux"
       }
+      ami_type      = "AL2_x86_64_GPU"
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
@@ -263,36 +265,56 @@ module "eks_managed_node_group" {
 #   # }
 # }
 
-# resource "aws_iam_role" "example" {
-#   name = "example"
+#  resource "aws_iam_role" "example" {
+#    name = "example"
+#    force_detach_policies = true
+#    assume_role_policy = jsonencode({
+#      Version = "2012-10-17"
+#      Statement = [
+#        {
+#          Action = "sts:AssumeRole"
+#          Effect = "Allow"
+#          Principal = {
+#            Service = "ec2.amazonaws.com"
+#          }
+#        },
+#      ]
+#    })
+#  }
 
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Action = "sts:AssumeRole"
-#         Effect = "Allow"
-#         Principal = {
-#           Service = "ec2.amazonaws.com"
-#         }
-#       },
-#     ]
-#   })
-# }
+#   resource "aws_iam_role" "da-mlops-test001-s3-bucket-role-1" {
+#    name = "example"
+#    force_detach_policies = true
+#    assume_role_policy = jsonencode({
+#      Version = "2012-10-17"
+#      Statement = [
+#        {
+#          Action = "sts:AssumeRole"
+#          Effect = "Allow"
+#          Principal = {
+#            Service = "s3.amazonaws.com"
+#          }
+#        },
+#      ]
+#    })
+#  }
 
-# resource "aws_iam_role_policy_attachment" "example-AmazonEKSWorkerNodePolicy" {
-#   role       = aws_iam_role.example.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-# }
+#  resource "aws_iam_role_policy_attachment" "example-AmazonEKSWorkerNodePolicy" {
+#    role       = aws_iam_role.example.name
+#    policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+#  }
+#  resource "aws_iam_role_policy_attachment" "example-AmazonEKS_CNI_Policy" {
+#    role       = aws_iam_role.example.name
+#    policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+#  }
+#  resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryReadOnly" {
+#    role       = aws_iam_role.example.name
+#    policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+#  }
 
-# resource "aws_iam_role_policy_attachment" "example-AmazonEKS_CNI_Policy" {
-#   role       = aws_iam_role.example.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-# }
-
-# resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryReadOnly" {
-#   role       = aws_iam_role.example.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+#  resource "aws_iam_instance_profile" "example_instance_profile" {
+#   name = "example-instance-profile"
+#   role = aws_iam_role.example.name
 # }
 
 
