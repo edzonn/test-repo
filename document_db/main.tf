@@ -12,11 +12,13 @@ resource "aws_docdb_cluster_parameter_group" "da-mlops-test-docdb-param" {
     family = var.family
     name = var.name
     # # parameter_group_name = var.parameter_group_name
-    # parameter {
+     parameter {
     #     name = "audit_logs.role_arn"
+         name = "tls"
     #     value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/da-mlops-test-docdb-role"
-    #     apply_method = "immediate"
-    # }
+         value = "enabled"
+         apply_method = "immediate"
+     }
 }
 
 resource "aws_docdb_cluster" "da-mlops-test-docdb" {
@@ -39,6 +41,7 @@ resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance" {
     # engine_version = var.engine_version
     cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
     instance_class = var.instance_class
+    ca_cert_identifier = "rds-ca-rsa4096-g1"
     apply_immediately = true
     tags = {
         Name = "da-mlops-test-docdb-instance"
@@ -50,6 +53,7 @@ resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance-2" {
     # engine_version = var.engine_version
     cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
     instance_class = var.instance_class
+    ca_cert_identifier = "rds-ca-rsa4096-g1"
     apply_immediately = true
     tags = {
         Name = "da-mlops-test-docdb-instance"

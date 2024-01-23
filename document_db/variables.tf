@@ -115,3 +115,8 @@ variable "engine_version" {
     default     = "3.6.0"
     type        = string
 }
+
+variable "ca_cert_identifier" {
+    default = null
+    type = string
+}
