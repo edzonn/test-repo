@@ -21,6 +21,15 @@ data "terraform_remote_state" "module_outputs" {
   }
 }
 
+data "terraform_remote_state" "module_outputs_eks" {
+  backend = "s3"
+  config = {
+    bucket = "aws-terraform-tfstatefile-001"
+    key    = "dev/terraform-eks-test.statefile"
+    region = "ap-southeast-1"
+  }
+}
+
 data "aws_ami" "eks_node_gpu" {
   most_recent = true
   # owners      = ["amazon"]
@@ -105,7 +114,7 @@ module "eks_managed_node_group" {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t3.medium"]
+      instance_types = ["t3.micro"]
       min_size       = 0
       max_size       = 2
       desired_size   = 0
@@ -132,15 +141,15 @@ module "eks_managed_node_group" {
     two = {
       name = "node-group-2"
 
-      instance_types = ["g4dn.xlarge"]
-      min_size       = 1
-      max_size       = 2
-      desired_size   = 1
+      instance_types = ["t3.micro"]
+      min_size       = 3
+      max_size       = 3
+      desired_size   = 3
       capacity_type  = "ON_DEMAND"
       labels = {
         disktype = "linux"
       }
-      ami_type      = "AL2_x86_64_GPU"
+      # ami_type      = "AL2_x86_64_GPU"
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
@@ -155,6 +164,112 @@ module "eks_managed_node_group" {
       }
     }
   }
+}
+
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks_managed_node_group.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks_managed_node_group.cluster_certificate_authority_data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks_managed_node_group.cluster_name]
+      command     = "aws"
+    }
+  }
+}
+
+resource "helm_release" "aws-load-balancer-controller" {
+  name = "aws-load-balancer-controller"
+
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "aws-loadbalancer"
+  version    = "1.7.1"
+
+  set {
+    name  = "clusterName"
+    value = module.eks_managed_node_group.cluster_name
+  }
+
+  set {
+    name  = "image.tag"
+    value = "v2.7.1"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.aws_load_balancer_controller.arn
+  }
+
+  set {
+    name  = "vpcId"
+    value = data.terraform_remote_state.module_outputs.outputs.vpc_id
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.aws_load_balancer_controller_attach
+  ]
+}
+
+data "tls_certificate" "eks" {
+  url = module.eks_managed_node_group.cluster_oidc_issuer_url
+}
+
+# resource "aws_iam_openid_connect_provider" "eks" {
+#   client_id_list  = ["sts.amazonaws.com"]
+#   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+#   url             = module.eks_managed_node_group.cluster_oidc_issuer_url
+# }
+
+data "aws_iam_openid_connect_provider" "eks" {
+  url = "https://oidc.eks.ap-southeast-1.amazonaws.com/id/F7DF837417377F323AF9988E4AD3C80F"
+}
+
+data "aws_iam_openid_connect_provider" "eks_arn" {
+  arn = "arn:aws:iam::092744370500:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/F7DF837417377F323AF9988E4AD3C80F"
+}
+
+data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:aws-loadbalancer:aws-load-balancer-controller"]
+    }
+
+    principals {
+      identifiers = [data.aws_iam_openid_connect_provider.eks_arn.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role_policy.json
+  name               = "aws-load-balancer-controller"
+}
+
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  policy = file("./AWSLoadBalancerController.json")
+  name   = "AWSLoadBalancerController"
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+  role       = aws_iam_role.aws_load_balancer_controller.name
+  policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
+}
+
+output "aws_load_balancer_controller_role_arn" {
+  value = aws_iam_role.aws_load_balancer_controller.arn
 }
 
 # module "eks_managed_node_group-1" {
