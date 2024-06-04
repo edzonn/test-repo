@@ -28,3 +28,8 @@ variable "region" {
   type        = string
 }
 
+variable "bastion_subnet" {
+  description = "The CIDR block for the bastion subnet"
+  default     = "10.22.47.0/24"
+  type        = string
+}

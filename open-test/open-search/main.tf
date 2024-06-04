@@ -173,25 +173,25 @@ resource "aws_opensearch_domain" "opensearch" {
   }
 
 
-  # access_policies = file("${path.module}/iam.json")
+  access_policies = file("${path.module}/iam.json")
 }
 
-  # access_policies = var.access_policy == null && var.default_policy_for_fine_grained_access_control ? (<<CONFIG
-  #   {
-  #       "Version": "2012-10-17",
-  #       "Statement": [
-  #           {
-  #               "Action": "es:*",
-  #               "Principal": {
-  #                 "AWS": "*"
-  #                 },
-  #               "Effect": "Allow",
-  #               "Resource": "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${local.domain}/*"
-  #           }
-  #       ]
-  #   }
-  #   CONFIG 
-  # ) : var.access_policy
+#   access_policies = var.access_policy == null && var.default_policy_for_fine_grained_access_control ? (<<CONFIG
+#     {
+#         "Version": "2012-10-17",
+#         "Statement": [
+#             {
+#                 "Action": "es:*",
+#                 "Principal": {
+#                   "AWS": "*"
+#                   },
+#                 "Effect": "Allow",
+#                 "Resource": "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${local.domain}/*"
+#             }
+#         ]
+#     }
+#     CONFIG 
+#   ) : var.access_policy
 # }
 # resource "aws_ssm_parameter" "opensearch_master_user" {
 #   name        = "/service/${var.service}/MASTER_USER"

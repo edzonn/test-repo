@@ -42,3 +42,8 @@ output "database_subnet_private_subnet" {
 output "cidr_block" {
   value = aws_vpc.da-mlops-test-vpc.cidr_block
 }
+
+output "bastion_subnet_id" {
+  value = aws_subnet.da-mlops-test-bastion-subnet.*.id
+}
+

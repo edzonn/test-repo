@@ -1,9 +1,0 @@
-# how to grep Node-selector kubernets
-
-# kubectl get nodes --show-labels
-
-# kubectl get nodes --selector='!node-role.kubernetes.io/master'  
-
-# kubectl get nodes --selector='node-role.kubernetes.io/master'
-
-# kubectl get nodes --selector='node-role.kubernetes.io/master' --show-labels

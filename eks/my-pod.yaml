@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx:latest
+    volumeMounts:
+    - name: nginx-cache
+      mountPath: /var/log/nginx
+  volumes:
+  - name: nginx-cache
+    emptyDir: {}

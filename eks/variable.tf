@@ -24,3 +24,8 @@ variable "scaling_policies" {
     }
   }
 }
+
+variable "cluster_name" {
+  type = string
+  default = "test-cluster-da"
+}
