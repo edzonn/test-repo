@@ -88,3 +88,43 @@ items:
 kind: List
 metadata:
   resourceVersion: ""
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[?12h[?12l[27m[23m[29m[m[H[2J[?25l[1;1H[34m# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#[m
+[36mapiVersion[m[35m:[m v1
+[36mkind[m[35m:[m Service
+[36mmetadata[m[35m:[m
+  [36mannotations[m[35m:[m
+    [36mmeta.helm.sh/release-name[m[35m:[m traefik
+    [36mmeta.helm.sh/release-namespace[m[35m:[m traefik
+    [36mservice.beta.kubernetes.io/aws-load-balancer-type[m[35m:[m nlb
+  [36mcreationTimestamp[m[35m:[m [31m"2023-08-09T00:48:29Z"[m
+  [36mfinalizers[m[35m:[m
+  [38;5;130m- [mservice.kubernetes.io/load-balancer-cleanup
+  [36mlabels[m[35m:[m
+    [36mapp.kubernetes.io/instance[m[35m:[m traefik-traefik
+    [36mapp.kubernetes.io/managed-by[m[35m:[m Helm
+    [36mapp.kubernetes.io/name[m[35m:[m traefik
+    [36mhelm.sh/chart[m[35m:[m traefik-23.2.0
+  [36mname[m[35m:[m traefik
+  [36mnamespace[m[35m:[m traefik
+  [36mresourceVersion[m[35m:[m [31m"11609"[m
+  [36muid[m[35m:[m 14b46d1e-cac6-49d5-b968-6e71c4207f85
+[36mspec[m[35m:[m
+  [36mallocateLoadBalancerNodePorts[m[35m:[m [31mtrue[m
+  [36mclusterIP[m[35m:[m 172.20.144.3
+  [36mclusterIPs[m[35m:[m
+  [38;5;130m- [m172.20.144.3
+  [36mexternalTrafficPolicy[m[35m:[m Cluster
+  [36minternalTrafficPolicy[m[35m:[m Cluster
+  [36mipFamilies[m[35m:[m
+  [38;5;130m- [mIPv4
+  [36mipFamilyPolicy[m[35m:[m SingleStack
+  [36mports[m[35m:[m
+  [38;5;130m- [m[36mname[m[35m:[m web
+    [36mnodePort[m[35m:[m [31m32361[m
+    [36mport[m[35m:[m [31m80[m
+    [36mprotocol[m[35m:[m TCP[39;160H1,1[11CTop[1;1H[?25h[?25l[?25h[39;1H[?2004l[?1l>[?1049l[23;0;0tVim: Caught deadly signal HUP
+Vim: Finished.
+[39;1H

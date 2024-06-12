@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: local-pvc-pod1
+spec:
+  containers:
+  - name: php
+    image: php:8-apache
+    volumeMounts:
+    - mountPath: "/data"
+      name: local-pv1
+  volumes:
+  - name: local-pv1
+    persistentVolumeClaim:
+      claimName: local-pvc1

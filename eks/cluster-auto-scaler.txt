@@ -1,0 +1,59 @@
+qI^h19D@
+
+aws autoscaling create-auto-scaling-group \
+  --auto-scaling-group-name gpu-auto-scaling-group \
+  --launch-configuration-name gpu-launch-configuration \
+  --min-size 1 \
+  --max-size 10 \
+  --desired-capacity 1 \
+  --vpc-zone-identifier "subnet-00470ce75a0e39902,subnet-0ab174606b8a91368,subnet-04931625dfdb65d7d" \
+  --tags Key=kubernetes.io/cluster/test-cluster-da,Value=owned,PropagateAtLaunch=true
+
+
+aws autoscaling create-launch-configuration \
+  --launch-configuration-name gpu-launch-configuration \
+  --image-id ami-03fa82aeb4c96b481 \
+  --instance-type g4dn.xlarge \
+  --security-groups sg-07e3da38c1843a7f2 \
+  --iam-instance-profile eks-node-group-role \
+  --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":100,"VolumeType":"gp2"}}]'
+
+
+kubectl-1 -n kube-system \
+    set image deployment.apps/cluster-autoscaler \
+    cluster-autoscaler=us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v${AUTOSCALER_VERSION}
+
+kubectl-1 -n kube-system logs -f deployment/cluster-autoscaler
+
+
+cat <<EoF> nginx.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-to-scaleout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        service: nginx
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx-to-scaleout
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+EoF
+
+aws sts assume-role --role-arn arn:aws:iam::092744370500:role/S3AccessRole --role-session-name test-role-session
+
+https://archive.eksworkshop.com/beginner/080_scaling/deploy_ca/

@@ -106,7 +106,22 @@ variable "identifier" {
     type        = string
 }
 
+variable "identifier-2" {
+    default     = "da-mlops-test-docdb-instance-2"
+    type        = string
+}
+
+variable "identifier-3" {
+    default     = "da-mlops-test-docdb-instance-3"
+    type        = string
+}
+
 variable "engine_version" {
     default     = "3.6.0"
     type        = string
+}
+
+variable "ca_cert_identifier" {
+    default = null
+    type = string
 }
