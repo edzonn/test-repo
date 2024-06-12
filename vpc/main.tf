@@ -124,15 +124,15 @@ resource "aws_subnet" "da-mlops-test-db-sub" {
   }
 }
 
-# # # create aws_route
-# resource "aws_route" "da-mlops-test-priv-route" {
-#   count                  = length(var.private_subnet_cidr)
-#   route_table_id         = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id         = element(aws_nat_gateway.da-mlops-test-natgw.*.id, count.index)
-#   # nat_gateway_id = aws_nat_gateway.da-mlops-test-natgw[0].id
+# # create aws_route
+resource "aws_route" "da-mlops-test-priv-route" {
+  count                  = length(var.private_subnet_cidr)
+  route_table_id         = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = element(aws_nat_gateway.da-mlops-test-natgw.*.id, count.index)
+  # nat_gateway_id = aws_nat_gateway.da-mlops-test-natgw[0].id
 
-# }
+}
 
 
 # create routeable public subnet

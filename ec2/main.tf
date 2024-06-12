@@ -172,49 +172,91 @@ data "terraform_remote_state" "module_outputs" {
 # }
 
 
-resource "aws_instance" "da-mlops-test-ec2-02" {
-  ami                    = "ami-091a58610910a87a9"
-  instance_type          = "t3.medium"
-  key_name               = "da-mlops-test-key"
-#  subnet_id              = data.terraform_remote_state.module_outputs.outputs.bastion_subnet_id[0]
-  # vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
-  # create iam instance profile
-  iam_instance_profile = "ec2-ssm-role"
-  tags = {
-    Name = "da-mlops-test-ec2-2"
+# resource "aws_instance" "da-mlops-test-ec2-02" {
+#   ami                    = "ami-091a58610910a87a9"
+#   instance_type          = "t3.medium"
+#   key_name               = "da-mlops-test-key"
+# #  subnet_id              = data.terraform_remote_state.module_outputs.outputs.bastion_subnet_id[0]
+#   # vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
+#   # create iam instance profile
+#   iam_instance_profile = "ec2-ssm-role"
+#   tags = {
+#     Name = "da-mlops-test-ec2-2"
+#   }
+#   associate_public_ip_address = true
+
+#   #  root volume size gp3
+
+#   root_block_device {
+#     volume_size = 70
+#     volume_type = "gp3"
+#     iops = 3000
+#     throughput = 125
+#     # encrypted = true
+#     # kms_key_id = data.aws_kms_key.default.arn
+#     tags = {
+#       Name = "da-mlops-test-ec2-02"
+#     }
+
+#   }
+
+#   ebs_block_device {
+#     device_name = "/dev/sdh"
+#     volume_size = 50
+#     volume_type = "gp2"
+#   }
+
+#   # create ec2 instance user data with filebase64encode
+
+#   user_data = <<-EOF
+#               #!/bin/bash
+#               sudo service sshd restart || service ssh restart
+#               sudo yum update -y
+#               sudo yum install nginx -y
+#               curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+#               sudo install minikube-linux-amd64 /usr/local/bin/minikube
+#               sudo service nginx restart
+#               EOF
+# }
+
+resource "aws_security_group" "test" {
+  name        = "test"
+  description = "test"
+
+  vpc_id = data.terraform_remote_state.module_outputs.outputs.vpc_id
+
+  ingress {
+    from_port   = var.allowed_ports[0]
+    to_port     = var.allowed_ports[0]
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-  associate_public_ip_address = true
 
-  #  root volume size gp3
-
-  root_block_device {
-    volume_size = 70
-    volume_type = "gp3"
-    iops = 3000
-    throughput = 125
-    # encrypted = true
-    # kms_key_id = data.aws_kms_key.default.arn
-    tags = {
-      Name = "da-mlops-test-ec2-02"
+  dynamic "ingress" {
+    for_each = var.allowed_ports
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
     }
-
   }
 
-  ebs_block_device {
-    device_name = "/dev/sdh"
-    volume_size = 50
-    volume_type = "gp2"
+  egress {
+    from_port   = var.allowed_ports[0]
+    to_port     = var.allowed_ports[0]
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # create ec2 instance user data with filebase64encode
-
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo service sshd restart || service ssh restart
-              sudo yum update -y
-              sudo yum install nginx -y
-              curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-              sudo install minikube-linux-amd64 /usr/local/bin/minikube
-              sudo service nginx restart
-              EOF
+  dynamic "egress" {
+    for_each = var.allowed_ports
+    content {
+      from_port   = egress.value
+      to_port     = egress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
 }
+

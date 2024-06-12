@@ -41,7 +41,7 @@ resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance" {
     # engine_version = var.engine_version
     cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
     instance_class = var.instance_class
-    ca_cert_identifier = "rds-ca-rsa4096-g1"
+    ca_cert_identifier = "rds-ca-rsa2048-g1"
     apply_immediately = true
     tags = {
         Name = "da-mlops-test-docdb-instance"
@@ -53,7 +53,19 @@ resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance-2" {
     # engine_version = var.engine_version
     cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
     instance_class = var.instance_class
-    ca_cert_identifier = "rds-ca-rsa4096-g1"
+    ca_cert_identifier = "rds-ca-rsa2048-g1"
+    apply_immediately = true
+    tags = {
+        Name = "da-mlops-test-docdb-instance"
+    }
+}
+
+resource "aws_docdb_cluster_instance" "da-mlops-test-docdb-instance-3" {
+    identifier = var.identifier-3
+    # engine_version = var.engine_version
+    cluster_identifier = aws_docdb_cluster.da-mlops-test-docdb.id
+    instance_class = var.instance_class
+    ca_cert_identifier = "rds-ca-rsa2048-g1"
     apply_immediately = true
     tags = {
         Name = "da-mlops-test-docdb-instance"

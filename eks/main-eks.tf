@@ -381,6 +381,19 @@ module "apptier_lt" {
   # }
 }
 
+module "ebs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "${var.cluster_name}-ebs-csi"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks_managed_node_group.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
 
 module "eks_managed_node_group" {
   source          = "terraform-aws-modules/eks/aws"
@@ -389,46 +402,76 @@ module "eks_managed_node_group" {
   cluster_version = "1.27"
   iam_role_name   = "eks-node-group-role"
   subnet_ids      = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
-  # subnet_ids                     = ["subnet-04352532e5e523d82", "subnet-0584f5f975a4ca738", "subnet-0d6433874ca54904e"]
   vpc_id                         = data.terraform_remote_state.module_outputs.outputs.vpc_id
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access = false
+  cluster_endpoint_private_access = true
+
+  cluster_addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
+      most_recent = true
+      resolve_conflicts="PRESERVE"
+    }
+  }
 
   node_security_group_additional_rules = {
-    # # Control plane invoke Karpenter webhook
-    # ingress_karpenter_webhook_tcp = {
-    #   description                   = "Control plane invoke Karpenter webhook"
-    #   protocol                      = "tcp"
-    #   from_port                     = 8443
-    #   to_port                       = 8443
-    #   type                          = "ingress"
-    #   source_cluster_security_group = true
-    # },
-    # ingress_allow_access_from_control_plane = {
-    #   type                          = "ingress"
-    #   protocol                      = "tcp"
-    #   from_port                     = 9443
-    #   to_port                       = 9443
-    #   source_cluster_security_group = true
-    #   description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
-    # },
-  #   egress_all = {
-  #     description = "Node all egress"
-  #     protocol    = "-1"
-  #     from_port   = 0
-  #     to_port     = 0
-  #     type        = "egress"
-  #     cidr_blocks = ["0.0.0.0/0"]
-  #     # ipv6_cidr_blocks = ["::/0"]
-  #   }
+    # Control plane invoke Karpenter webhook
+    ingress_karpenter_webhook_tcp = {
+      description                   = "Control plane invoke Karpenter webhook"
+      protocol                      = "tcp"
+      from_port                     = 8443
+      to_port                       = 8443
+      type                          = "ingress"
+      source_cluster_security_group = true
+    },
+    ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 9443
+      to_port                       = 9443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+    },
+    egress_all = {
+      description = "Node all egress"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+      # ipv6_cidr_blocks = ["::/0"]
+    }
 
-  #   egress_rule = {
-  #     description = "Node all egress"
-  #     protocol    = "-1"
-  #     from_port   = 80
-  #     to_port     = 80
-  #     type        = "egress"
-  #     cidr_blocks = ["0.0.0.0/0"]
-  #   }
+    egress_rule = {
+      description = "Node all egress"
+      protocol    = "-1"
+      from_port   = 80
+      to_port     = 80
+      type        = "egress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress_15017 = {
+      protocol                      = "TCP"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+    ingress_15012 = {
+      protocol                      = "TCP"
+      from_port                     = 15012
+      to_port                       = 15012
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+
+    egress_15012 = {
+      protocol                      = "TCP"
+      from_port                     = 15012
+      to_port                       = 15012
+      type                          = "egress"
+      source_cluster_security_group = true
+    }
   }
 
   eks_managed_node_groups = {
@@ -436,9 +479,9 @@ module "eks_managed_node_group" {
       name = "node-group-1"
 
       instance_types = ["t3.micro"]
-      min_size       = 4
+      min_size       = 0
       max_size       = 4
-      desired_size   = 4
+      desired_size   = 0
       capacity_type  = "ON_DEMAND"
       ami_type = "AL2_x86_64"
       cluster_version = "1.26"
@@ -465,7 +508,7 @@ module "eks_managed_node_group" {
     two = {
       name = "node-group-2"
       cluster_version = "1.26"
-      instance_types = ["t3.micro"]
+      instance_types = ["t3.medium"]
       min_size       = 2
       max_size       = 5
       desired_size   = 2
