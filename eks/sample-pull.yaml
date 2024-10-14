@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240701232045367400000002
+    iam.amazonaws.com/role: arn:aws:iam::092744370500:role/test-role-with-oidc
+  name: myapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp-container
+          image: 092744370500.dkr.ecr.ap-southeast-1.amazonaws.com/test-ec2
+          command:
+          - /bin/bash
+          - -c
+          - >
+            apt-get update &&
+            apt-get install -y curl unzip &&
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&
+            unzip awscliv2.zip &&
+            ./aws/install &&
+            sleep 604800
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ecr-registry-secret
+
+
+
+

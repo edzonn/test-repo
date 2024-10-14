@@ -1,7 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005
   name: local-pvc1
+
+  # put node selector
+  
 spec:
   storageClassName: ebs-sc
   accessModes:

@@ -134,6 +134,14 @@ resource "aws_route" "da-mlops-test-priv-route" {
 
 }
 
+# route to s3 endpoint
+
+# resource "aws_route" "da-mlops-test-priv-route-s3" {
+#   count                  = length(var.private_subnet_cidr)
+#   route_table_id         = element(aws_route_table.da-mlops-test-priv-rtb.*.id, count.index)
+#   destination_cidr_block = data.terraform_remote_state.module_outputs.outputs.vpc_endpoint_s3_cidr_block
+#   vpc_endpoint_id        = data.terraform_remote_state.module_outputs.outputs.vpc_endpoint_s3_id
+# }
 
 # create routeable public subnet
 
@@ -220,6 +228,37 @@ resource "aws_db_subnet_group" "da-mlops-test-db-subnet-group" {
 #     tags = {
 #         Name = "da-mlops-test-ecrapi-endpoint"
 #     }
+# # policy=<<POLICY
+# # {
+# # 	"Statement": [
+# # 		{
+# # 			"Effect": "Allow",
+# # 			"Principal": "*",
+# # 			"Action": "*",
+# # 			"Resource": "*",
+# # 			"Condition": {
+# # 				"StringEquals": {
+# # 					"aws:PrincipalArn": [
+# # 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+# #             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+# #             "arn:aws:iam::092744370500:instance-profile/eks-a2c833df-aed6-a982-fbe8-e69553960588",
+# #             "arn:aws:iam::092744370500:role/role-with-oidc"
+# # 					]
+# # 				},
+# # 				"StringNotEquals": {
+# # 					"aws:sourceVpc": "vpc-04ff4c8abd765d446"
+# # 				}
+# # 			}
+# # 		}
+# # 	]
+# # }
+# # POLICY
+# # }
+
+# # add policy using data source 
+
+# # policy = file("${path.module}/policy.json")
+
 # }
 
 # # create ecrdkr endpoint
@@ -234,40 +273,168 @@ resource "aws_db_subnet_group" "da-mlops-test-db-subnet-group" {
 #     tags = {
 #         Name = "da-mlops-test-ecrdkr-endpoint"
 #     }
+# # policy=<<POLICY
+# # {
+# # 	"Statement": [
+# # 		{
+# # 			"Effect": "Allow",
+# # 			"Principal": "*",
+# # 			"Action": "*",
+# # 			"Resource": "*",
+# # 			"Condition": {
+# # 				"StringEquals": {
+# # 					"aws:PrincipalArn": [
+# # 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+# #             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+# #             "arn:aws:iam::092744370500:role/role-with-oidc"
+# # 					]
+# # 				},
+# # 				"StringNotEquals": {
+# # 					"aws:sourceVpc": "vpc-04ff4c8abd765d446"
+# # 				}
+# # 			}
+# # 		}
+# # 	]
+# # }
+# # POLICY
+
+# # policy = file("${path.module}/policy.json")
+
 # }
 
 # # create ecrapi ecr s3 endpoint
 
-# # resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-ecr-s3-endpoint" {
-# #     vpc_id = aws_vpc.da-mlops-test-vpc.id
-# #     service_name = "com.amazonaws.${var.region}.ecr.api"
-# #     vpc_endpoint_type = "Interface"
-# #     private_dns_enabled = true
-# #     security_group_ids = [aws_security_group.da-mlops-test-ecrapi-sg.id]
-# #     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-# #     tags = {
-# #         Name = "da-mlops-test-ecrapi-ecr-s3-endpoint"
-# #     }
+# resource "aws_vpc_endpoint" "da-mlops-test-ecrapi-ecr-s3-endpoint" {
+#     vpc_id = aws_vpc.da-mlops-test-vpc.id
+#     service_name = "com.amazonaws.${var.region}.ecr.api"
+#     vpc_endpoint_type = "Interface"
+#     private_dns_enabled = false
+#     security_group_ids = [aws_security_group.da-mlops-test-ecrapi-sg.id]
+#     subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+#     tags = {
+#         Name = "da-mlops-test-ecrapi-ecr-s3-endpoint"
+#     }
+# # policy=<<POLICY
+# # {
+# # 	"Statement": [
+# # 		{
+# # 			"Effect": "Allow",
+# # 			"Principal": "*",
+# # 			"Action": "*",
+# # 			"Resource": "*",
+# # 			"Condition": {
+# # 				"StringEquals": {
+# # 					"aws:PrincipalArn": [
+# # 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+# #             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+# #             "arn:aws:iam::092744370500:role/role-with-oidc"
+# # 					]
+# # 				},
+# # 				"StringNotEquals": {
+# # 					"aws:sourceVpc": "vpc-04ff4c8abd765d446"
+# # 				}
+# # 			}
+# # 		}
+# # 	]
 # # }
+# # POLICY
+
+
+# }
+
 
 # # create ecs s3 endpoint
 
-resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
-    vpc_id = aws_vpc.da-mlops-test-vpc.id
-    service_name = "com.amazonaws.${var.region}.s3"
-    vpc_endpoint_type = "Gateway"
-    private_dns_enabled = false
-    # security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
-    # subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
-    route_table_ids = flatten([
-          aws_route_table.da-mlops-test-priv-rtb[*].id,
-          [aws_route_table.da-mlops-test-pub-rtb.id]
-  ])
+# resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
+#     vpc_id = aws_vpc.da-mlops-test-vpc.id
+#     service_name = "com.amazonaws.${var.region}.s3"
+#     vpc_endpoint_type = "Gateway"
+#     private_dns_enabled = false
+#     # security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+#     # subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+#     route_table_ids = flatten([
+#           aws_route_table.da-mlops-test-priv-rtb[*].id,
+#           [aws_route_table.da-mlops-test-pub-rtb.id]
+#   ])
 
-    tags = {
-        Name = "da-mlops-test-ecs-s3-endpoint"
-    }
-}
+#     tags = {
+#         Name = "da-mlops-test-ecs-s3-endpoint"
+#     }
+#   # create policy for s3 endpoint minimal access
+
+# # policy=<<POLICY
+# # {
+# # 	"Statement": [
+# # 		{
+# # 			"Effect": "Allow",
+# # 			"Principal": "*",
+# # 			"Action": "*",
+# # 			"Resource": "*",
+# # 			"Condition": {
+# # 				"StringEquals": {
+# # 					"aws:PrincipalArn": [
+# # 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+# #             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+# #             "arn:aws:iam::092744370500:instance-profile/eks-a2c833df-aed6-a982-fbe8-e69553960588",
+# #             "arn:aws:iam::092744370500:role/role-with-oidc"
+# # 					]
+# # 				},
+# # 				"StringNotEquals": {
+# # 					"aws:sourceVpc": "vpc-04ff4c8abd765d446"
+# # 				}
+# # 			}
+# # 		}
+# # 	]
+# # }
+# # POLICY
+
+# # policy = file("${path.module}/policy.json")
+# }
+
+
+# resource "aws_vpc_endpoint" "da-mlops-test-interface-s3-endpoint" {
+#     vpc_id = aws_vpc.da-mlops-test-vpc.id
+#     service_name = "com.amazonaws.${var.region}.s3"
+#     vpc_endpoint_type = "Interface"
+#     private_dns_enabled = true
+#     # security_group_ids = [aws_security_group.da-mlops-test-ecs-sg.id]
+#     # subnet_ids = aws_subnet.da-mlops-test-private-subnet.*.id
+#     route_table_ids = flatten([
+#           aws_route_table.da-mlops-test-priv-rtb[*].id,
+#           [aws_route_table.da-mlops-test-pub-rtb.id]
+#   ])
+
+#     tags = {
+#         Name = "da-mlops-test-ecs-s3-endpoint-interface"
+#     }
+#   # create policy for s3 endpoint minimal access
+
+# policy=<<POLICY
+# {
+# 	"Statement": [
+# 		{
+# 			"Effect": "Allow",
+# 			"Principal": "*",
+# 			"Action": "*",
+# 			"Resource": "*",
+# 			"Condition": {
+# 				"StringEquals": {
+# 					"aws:PrincipalArn": [
+# 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+#             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+#             "arn:aws:iam::092744370500:instance-profile/eks-a2c833df-aed6-a982-fbe8-e69553960588",
+#             "arn:aws:iam::092744370500:role/role-with-oidc"
+# 					]
+# 				},
+# 				"StringNotEquals": {
+# 					"aws:SourceVpc": "vpc-04ff4c8abd765d446"
+# 				}
+# 			}
+# 		}
+# 	]
+# }
+# POLICY
+# }
 
 # # create ecs-agent endpoint.
 
@@ -310,11 +477,45 @@ resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
 # }
 
 # resource "aws_vpc_endpoint" "da-mlops-test-vpce" {
-#   count                     = length(var.private_subnet_cidr)
 #   vpc_id                    = aws_vpc.da-mlops-test-vpc.id
-#   subnet_ids                = [element(aws_subnet.da-mlops-test-private-subnet.*.id, count.index)]
+#   subnet_ids                = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
+#   vpc_endpoint_type         = "Interface"
 #   service_name              = "com.amazonaws.${var.region}.ec2" # EC2 endpoint service name
 #   private_dns_enabled       = false
+#   tags = {
+#         Name = "da-mlops-test-ecs-s3-endpoint"
+#     }
+# policy=<<POLICY
+# {
+# 	"Statement": [
+# 		{
+# 			"Effect": "Allow",
+# 			"Principal": "*",
+# 			"Action": "*",
+# 			"Resource": "*",
+# 			"Condition": {
+# 				"StringEquals": {
+# 					"aws:PrincipalArn": [
+# 						"arn:aws:iam::092744370500:role/AmazonEKS_EBS_CSI_DriverRole",
+#             "arn:aws:iam::092744370500:role/node-group-2-eks-node-group-20240630055633841600000005",
+#             "arn:aws:iam::092744370500:role/role-with-oidc"
+# 					]
+# 				},
+# 				"StringNotEquals": {
+# 					"aws:sourceVpc": "vpc-04ff4c8abd765d446"
+# 				}
+# 			}
+# 		}
+# 	]
+# }
+# POLICY
+
+# policy = file("${path.module}/policy.json")
+
+  # depends_on = [ 
+  #     aws_subnet.da-mlops-test-private-subnet]
+
+# create policy for ec2 endpoint minimal access with principal arn
 # }
 
 # resource "aws_route" "da-mlops-test-priv-route" {
@@ -325,4 +526,46 @@ resource "aws_vpc_endpoint" "da-mlops-test-ecs-s3-endpoint" {
 #   # If you want to route traffic to the VPC endpoint instead of the NAT Gateway:
 #   gateway_id             = element(aws_vpc_endpoint.da-mlops-test-vpce.*.id, count.index)
 # }
+
+
+# module "iam_assumable_role_with_oidc" {
+#   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+
+#   create_role = true
+
+#   role_name = "role-with-oidc"
+
+#   tags = {
+#     Role = "role-with-oidc"
+#   }
+
+#   provider_url = "oidc.eks.ap-southeast-1.amazonaws.com/id/EF128E7F2F04EBEAF481E9FA4B46BD93"
+
+#   role_policy_arns = [
+#     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+#     "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+#   ]
+#   number_of_role_policy_arns = 2
+# }
+
+# module "iam_assumable_role_with_oidc-test" {
+#   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+
+#   create_role = true
+
+#   role_name = "test-role-with-oidc"
+
+#   tags = {
+#     Role = "test-role-with-oidc"
+#   }
+
+#   provider_url = "oidc.eks.ap-southeast-1.amazonaws.com/id/CADC4752C6A842DE06CCA092E41B8690"
+
+#   role_policy_arns = [
+#     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+#     "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+#   ]
+#   number_of_role_policy_arns = 2
+# }
+
 

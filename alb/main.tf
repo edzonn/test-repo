@@ -66,12 +66,6 @@ module "nlb" {
       stickiness = {
         type = "source_ip"
       }
-
-      tags = {
-        tcp_udp = true
-      }
     }
   }
-
-  tags = local.tags
 }

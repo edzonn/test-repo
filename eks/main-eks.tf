@@ -1,119 +1,118 @@
 
+data "terraform_remote_state" "module_outputs" {
+  backend = "s3"
+  config = {
+    bucket = "da-mlops-test0021-s3-bucket"
+    key    = "dev/terraform.statefile"
+    region = "ap-southeast-1"
+  }
+}
 
-# data "terraform_remote_state" "module_outputs" {
-#   backend = "s3"
-#   config = {
-#     bucket = "da-mlops-test0021-s3-bucket"
-#     key    = "dev/terraform.statefile"
-#     region = "ap-southeast-1"
-#   }
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks_managed_node_group.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks_managed_node_group.cluster_certificate_authority_data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks_managed_node_group.cluster_name]
+      command     = "aws"
+    }
+  }
+}
+
+resource "helm_release" "aws-load-balancer-controller" {
+  name = "aws-load-balancer-controller"
+
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.7.1"
+
+  set {
+    name  = "clusterName"
+    value = module.eks_managed_node_group.cluster_name
+  }
+
+  set {
+    name  = "image.tag"
+    value = "v2.7.1"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.aws_load_balancer_controller.arn
+  }
+
+  set {
+    name  = "vpcId"
+    value = data.terraform_remote_state.module_outputs.outputs.vpc_id
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.aws_load_balancer_controller_attach
+  ]
+}
+
+data "tls_certificate" "eks" {
+  url = module.eks_managed_node_group.cluster_oidc_issuer_url
+}
+
+# resource "aws_iam_openid_connect_provider" "eks" {
+#   client_id_list  = ["sts.amazonaws.com"]
+#   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+#   url             = module.eks_managed_node_group.cluster_oidc_issuer_url
 # }
 
+data "aws_iam_openid_connect_provider" "eks" {
+  url = "https://oidc.eks.ap-southeast-1.amazonaws.com/id/A1BEC1819DCDF219EE674DE5DABB01F8"
+}
 
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.eks_managed_node_group.cluster_endpoint
-#     cluster_ca_certificate = base64decode(module.eks_managed_node_group.cluster_certificate_authority_data)
-#     exec {
-#       api_version = "client.authentication.k8s.io/v1beta1"
-#       args        = ["eks", "get-token", "--cluster-name", module.eks_managed_node_group.cluster_name]
-#       command     = "aws"
-#     }
-#   }
-# }
+data "aws_iam_openid_connect_provider" "eks_arn" {
+  arn = "arn:aws:iam::092744370500:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/A1BEC1819DCDF219EE674DE5DABB01F8"
+}
 
-# resource "helm_release" "aws-load-balancer-controller" {
-#   name = "aws-load-balancer-controller"
+data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
 
-#   repository = "https://aws.github.io/eks-charts"
-#   chart      = "aws-load-balancer-controller"
-#   namespace  = "aws-loadbalancer"
-#   version    = "1.7.1"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
 
-#   set {
-#     name  = "clusterName"
-#     value = module.eks_managed_node_group.cluster_name
-#   }
+    principals {
+      identifiers = [data.aws_iam_openid_connect_provider.eks_arn.arn]
+      type        = "Federated"
+    }
+  }
+}
 
-#   set {
-#     name  = "image.tag"
-#     value = "v2.7.1"
-#   }
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role_policy.json
+  name               = "aws-load-balancer-controller"
+}
 
-#   set {
-#     name  = "serviceAccount.name"
-#     value = "aws-load-balancer-controller"
-#   }
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  policy = file("./AWSLoadBalancerController.json")
+  name   = "AWSLoadBalancerController"
+}
 
-#   set {
-#     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-#     value = aws_iam_role.aws_load_balancer_controller.arn
-#   }
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+  role       = aws_iam_role.aws_load_balancer_controller.name
+  policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
+}
 
-#   set {
-#     name  = "vpcId"
-#     value = data.terraform_remote_state.module_outputs.outputs.vpc_id
-#   }
-
-#   depends_on = [
-#     aws_iam_role_policy_attachment.aws_load_balancer_controller_attach
-#   ]
-# }
-
-# data "tls_certificate" "eks" {
-#   url = module.eks_managed_node_group.cluster_oidc_issuer_url
-# }
-
-# # resource "aws_iam_openid_connect_provider" "eks" {
-# #   client_id_list  = ["sts.amazonaws.com"]
-# #   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-# #   url             = module.eks_managed_node_group.cluster_oidc_issuer_url
-# # }
-
-# data "aws_iam_openid_connect_provider" "eks" {
-#   url = "https://oidc.eks.ap-southeast-1.amazonaws.com/id/F7DF837417377F323AF9988E4AD3C80F"
-# }
-
-# data "aws_iam_openid_connect_provider" "eks_arn" {
-#   arn = "arn:aws:iam::092744370500:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/F7DF837417377F323AF9988E4AD3C80F"
-# }
-
-# data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role_policy" {
-#   statement {
-#     actions = ["sts:AssumeRoleWithWebIdentity"]
-#     effect  = "Allow"
-
-#     condition {
-#       test     = "StringEquals"
-#       variable = "${replace(data.aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-#       values   = ["system:serviceaccount:aws-loadbalancer:aws-load-balancer-controller"]
-#     }
-
-#     principals {
-#       identifiers = [data.aws_iam_openid_connect_provider.eks_arn.arn]
-#       type        = "Federated"
-#     }
-#   }
-# }
-
-# resource "aws_iam_role" "aws_load_balancer_controller" {
-#   assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role_policy.json
-#   name               = "aws-load-balancer-controller"
-# }
-
-# resource "aws_iam_policy" "aws_load_balancer_controller" {
-#   policy = file("./AWSLoadBalancerController.json")
-#   name   = "AWSLoadBalancerController"
-# }
-
-# resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
-#   role       = aws_iam_role.aws_load_balancer_controller.name
-#   policy_arn = aws_iam_policy.aws_load_balancer_controller.arn
-# }
-
-# output "aws_load_balancer_controller_role_arn" {
-#   value = aws_iam_role.aws_load_balancer_controller.arn
-# }
+output "aws_load_balancer_controller_role_arn" {
+  value = aws_iam_role.aws_load_balancer_controller.arn
+}
 
 # module "eks_managed_node_group-1" {
 #   # source          = "terraform-aws-modules/eks/aws"
@@ -402,76 +401,80 @@ module "eks_managed_node_group" {
   cluster_version = "1.27"
   iam_role_name   = "eks-node-group-role"
   subnet_ids      = data.terraform_remote_state.module_outputs.outputs.private_subnet_ids
-  vpc_id                         = data.terraform_remote_state.module_outputs.outputs.vpc_id
-  cluster_endpoint_public_access = false
+  vpc_id          = data.terraform_remote_state.module_outputs.outputs.vpc_id
+  cluster_endpoint_public_access = true
   cluster_endpoint_private_access = true
 
   cluster_addons = {
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
-      most_recent = true
-      resolve_conflicts="PRESERVE"
+      resolve_conflicts_on_update="PRESERVE"
+      addon_version = "v1.26.1-eksbuild.1"
+
     }
   }
 
+  # create storage class
+
+
   node_security_group_additional_rules = {
     # Control plane invoke Karpenter webhook
-    ingress_karpenter_webhook_tcp = {
-      description                   = "Control plane invoke Karpenter webhook"
-      protocol                      = "tcp"
-      from_port                     = 8443
-      to_port                       = 8443
-      type                          = "ingress"
-      source_cluster_security_group = true
-    },
-    ingress_allow_access_from_control_plane = {
-      type                          = "ingress"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      source_cluster_security_group = true
-      description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
-    },
-    egress_all = {
-      description = "Node all egress"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 0
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-      # ipv6_cidr_blocks = ["::/0"]
-    }
+    # ingress_karpenter_webhook_tcp = {
+    #   description                   = "Control plane invoke Karpenter webhook"
+    #   protocol                      = "tcp"
+    #   from_port                     = 8443
+    #   to_port                       = 8443
+    #   type                          = "ingress"
+    #   source_cluster_security_group = true
+    # },
+    # ingress_allow_access_from_control_plane = {
+    #   type                          = "ingress"
+    #   protocol                      = "tcp"
+    #   from_port                     = 9443
+    #   to_port                       = 9443
+    #   source_cluster_security_group = true
+    #   description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
+    # },
+    # egress_all = {
+    #   description = "Node all egress"
+    #   protocol    = "-1"
+    #   from_port   = 0
+    #   to_port     = 0
+    #   type        = "egress"
+    #   cidr_blocks = ["0.0.0.0/0"]
+    #   # ipv6_cidr_blocks = ["::/0"]
+    # }
 
-    egress_rule = {
-      description = "Node all egress"
-      protocol    = "-1"
-      from_port   = 80
-      to_port     = 80
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_15017 = {
-      protocol                      = "TCP"
-      from_port                     = 15017
-      to_port                       = 15017
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    ingress_15012 = {
-      protocol                      = "TCP"
-      from_port                     = 15012
-      to_port                       = 15012
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
+    # egress_rule = {
+    #   description = "Node all egress"
+    #   protocol    = "-1"
+    #   from_port   = 80
+    #   to_port     = 80
+    #   type        = "egress"
+    #   cidr_blocks = ["0.0.0.0/0"]
+    # }
+    # ingress_15017 = {
+    #   protocol                      = "TCP"
+    #   from_port                     = 15017
+    #   to_port                       = 15017
+    #   type                          = "ingress"
+    #   source_cluster_security_group = true
+    # }
+    # ingress_15012 = {
+    #   protocol                      = "TCP"
+    #   from_port                     = 15012
+    #   to_port                       = 15012
+    #   type                          = "ingress"
+    #   source_cluster_security_group = true
+    # }
 
-    egress_15012 = {
-      protocol                      = "TCP"
-      from_port                     = 15012
-      to_port                       = 15012
-      type                          = "egress"
-      source_cluster_security_group = true
-    }
+    # egress_15012 = {
+    #   protocol                      = "TCP"
+    #   from_port                     = 15012
+    #   to_port                       = 15012
+    #   type                          = "egress"
+    #   source_cluster_security_group = true
+    # }
   }
 
   eks_managed_node_groups = {
@@ -530,5 +533,34 @@ module "eks_managed_node_group" {
         }
       }
     }
+    # three = {
+    #   name = "node-group-3"
+    #   cluster_version = "1.26"
+    #   instance_types = ["t3.micro"]
+    #   min_size       = 1
+    #   max_size       = 5
+    #   desired_size   = 1
+    #   capacity_type  = "ON_DEMAND"
+    #   labels = {
+    #     disktype = "linux"
+    #   }
+    #   # ami_type      = "AL2_x86_64_GPU"
+    #   block_device_mappings = {
+    #     xvda = {
+    #       device_name = "/dev/xvda"
+    #       ebs = {
+    #         volume_size           = 20
+    #         volume_type           = "gp2"
+    #         delete_on_termination = true
+    #         # encrypted             = true
+    #         # kms_key_id            = "arn:aws:kms:ap-southeast-1:396246268796:key/d885b304-ea34-41f4-89ab-eece88bfb663"
+    #       }
+    #     }
+    #   }
+
+    #   iam_role_additional_policies = {
+    #     AmazonEKS_CNI_Policy =  "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+    #   }
+    # }
   }
 }

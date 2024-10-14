@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-deployment
+  labels:
+    app: ubuntu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  template:
+    metadata:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::092744370500:role/test-role-with-oidc
+        iam.amazonaws.com/role: arn:aws:iam::092744370500:role/test-role-with-oidc
+      labels:
+        app: ubuntu
+    spec:
+      containers:
+      - image: ubuntu:latest
+        name: ubuntu
+        command:
+          - /bin/bash
+          - -c
+          - >
+            apt-get update &&
+            apt-get install -y curl unzip &&
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&
+            unzip awscliv2.zip &&
+            ./aws/install &&
+            sleep 604800
+        imagePullPolicy: IfNotPresent
+      - name: myapp-container
+        image: 092744370500.dkr.ecr.ap-southeast-1.amazonaws.com/test-ec2
+        ports:
+          - containerPort: 80
+      imagePullSecrets:
+        - name: ecr-registry-secret
+      restartPolicy: Always

@@ -1,7 +1,7 @@
 data "terraform_remote_state" "module_outputs" {
   backend = "s3"
   config = {
-    bucket = "da-mlops-test0021-s3-bucket"
+    bucket = "aws-terraform-tfstatefile-001"
     key    = "dev/terraform.statefile"
     region = "ap-southeast-1"
   }

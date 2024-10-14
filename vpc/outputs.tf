@@ -47,3 +47,6 @@ output "bastion_subnet_id" {
   value = aws_subnet.da-mlops-test-bastion-subnet.*.id
 }
 
+# output "vpce_endpoint_s3" {
+#   value = aws_vpc_endpoint.da-mlops-test-ecs-s3-endpoint
+# }

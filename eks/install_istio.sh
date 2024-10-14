@@ -10,3 +10,4 @@ helm ls -n istio-system;
 kubectl get deployments -n istio-system --output wide;
 kubectl create namespace istio-ingress;
 helm install istio-ingress istio/gateway -n istio-ingress --wait;
+

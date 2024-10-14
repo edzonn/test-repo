@@ -1,0 +1,27 @@
+{
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Principal": "*",
+			"Action": "*",
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"aws:PrincipalArn": [
+						"arn:aws:iam::092744370500:user/terraform-user-poc"
+					]
+				},
+				"StringNotEquals": {
+					"aws:sourceVpc": "*"
+				},
+                "StringNotEquals": {
+                    "aws:sourceVpce": "*"
+                }
+			}
+		}
+	]
+}
+
+
+
+n
