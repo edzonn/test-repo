@@ -65,7 +65,7 @@ resource "aws_security_group" "da-mlops-test-lb" {
 
 resource "aws_lb" "da-mlops-test-lb" {
   name               = "da-mlops-test-lb"
-  internal           = false
+  internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.da-mlops-test-lb.id]
   subnets            = data.terraform_remote_state.module_outputs.outputs.public_subnet_ids
@@ -78,7 +78,7 @@ resource "aws_lb" "da-mlops-test-lb" {
 
 resource "aws_lb_listener" "da-mlops-test-lb-listener" {
   load_balancer_arn = aws_lb.da-mlops-test-lb.arn
-  port              = 4545
+  port              = 80
   protocol          = "HTTP"
   default_action {
     type             = "forward"
@@ -90,7 +90,7 @@ resource "aws_lb_listener" "da-mlops-test-lb-listener" {
 
 resource "aws_lb_target_group" "da-mlops-test-tg" {
   name     = "da-mlops-test-tg"
-  port     = 4545
+  port     = 80
   protocol = "HTTP"
   vpc_id   = data.terraform_remote_state.module_outputs.outputs.vpc_id
   tags = {
@@ -119,7 +119,7 @@ resource "aws_lb_listener_rule" "da-mlops-test-lb-listener-rule" {
 resource "aws_lb_target_group_attachment" "da-mlops-test-tg-attachment" {
   target_group_arn = aws_lb_target_group.da-mlops-test-tg.arn
   target_id        = aws_instance.da-mlops-test-ec2-01.id
-  port             = 4545
+  port             = 80
 }
 
 # create security group for ec2 instance
@@ -204,8 +204,8 @@ resource "aws_instance" "da-mlops-test-ec2-02" {
   ami                    = "ami-091a58610910a87a9"
   instance_type          = "t3.medium"
   key_name               = "da-mlops-test-key"
-#  subnet_id              = data.terraform_remote_state.module_outputs.outputs.bastion_subnet_id[0]
-  # vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
+  subnet_id              = data.terraform_remote_state.module_outputs.outputs.bastion_subnet_id[0]
+  vpc_security_group_ids = [aws_security_group.da-mlops-test-sg.id]
   # create iam instance profile
   iam_instance_profile = "ec2-ssm-role"
   tags = {
@@ -216,7 +216,7 @@ resource "aws_instance" "da-mlops-test-ec2-02" {
   #  root volume size gp3
 
   root_block_device {
-    volume_size = 70
+    volume_size = 50
     volume_type = "gp3"
     iops = 3000
     throughput = 125
@@ -230,7 +230,7 @@ resource "aws_instance" "da-mlops-test-ec2-02" {
 
   ebs_block_device {
     device_name = "/dev/sdh"
-    volume_size = 50
+    volume_size = 10
     volume_type = "gp2"
   }
 
@@ -288,3 +288,49 @@ resource "aws_security_group" "test" {
   }
 }
 
+
+
+
+
+# create network loadablancer 
+
+resource "aws_lb" "da-mlops-test-nlb" {
+  name               = "da-mlops-test-nlb"
+  internal           = false
+  load_balancer_type = "network"
+  security_groups    = [aws_security_group.da-mlops-test-lb.id]
+  subnets            = data.terraform_remote_state.module_outputs.outputs.public_subnet_ids
+  tags = {
+    Name = "da-mlops-test-nlb"
+  }
+}
+
+resource "aws_lb_target_group" "da-mlops-test-nlb-tg" {
+  name     = "da-mlops-test-nlb-tg"
+  port     = 80
+  protocol = "TCP"
+  vpc_id   = data.terraform_remote_state.module_outputs.outputs.vpc_id
+  tags = {
+    Name = "da-mlops-test-nlb-tg"
+  }
+
+  target_type = "alb"
+}
+
+resource "aws_lb_listener" "da-mlops-test-nlb-listener" {
+  load_balancer_arn = aws_lb.da-mlops-test-nlb.arn
+  port              = 80
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.da-mlops-test-nlb-tg.arn
+  }
+}
+
+# attach target group to network load balancer
+
+resource "aws_lb_target_group_attachment" "da-mlops-test-nlb-tg-attachment" {
+  target_group_arn = aws_lb_target_group.da-mlops-test-nlb-tg.arn
+  target_id        = aws_lb.da-mlops-test-lb.arn
+  port             = 80
+}
